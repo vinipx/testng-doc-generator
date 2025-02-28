@@ -1,8 +1,10 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'application'
 }
+
+// Apply the application plugin manually for compatibility with older Gradle versions
+apply plugin: 'application'
 
 group = 'io.vinipx'
 version = '1.0.0'
@@ -28,9 +30,7 @@ dependencies {
 }
 
 // Keep the application configuration for local development and testing
-application {
-    mainClass = 'io.vinipx.testngdoc.SimpleTestNGDocGenerator'
-}
+mainClassName = 'io.vinipx.testngdoc.SimpleTestNGDocGenerator'
 
 // Configure the main JAR
 jar {
