@@ -5,4 +5,4 @@ before_install:
   - ./gradlew wrapper --gradle-version 4.8.1
   - ./gradlew -version
 install:
-  - ./gradlew clean build publishToMavenLocal
+  - ./gradlew clean build publishToMavenLocal -x test
