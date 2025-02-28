@@ -27,7 +27,7 @@ Then add the dependency:
 <dependency>
     <groupId>com.github.vinipx</groupId>
     <artifactId>testng-doc-generator</artifactId>
-    <version>v1.0.1</version>
+    <version>v1.0.2</version>
 </dependency>
 ```
 
@@ -45,7 +45,7 @@ Then add the dependency:
 
 ```groovy
 dependencies {
-    implementation 'com.github.vinipx:testng-doc-generator:v1.0.1'
+    implementation 'com.github.vinipx:testng-doc-generator:v1.0.2'
 }
 ```
 
@@ -61,7 +61,7 @@ Add the dependency to your `pom.xml`:
 <dependency>
     <groupId>io.vinipx</groupId>
     <artifactId>testng-doc-generator</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 </dependency>
 ```
 
@@ -71,7 +71,7 @@ Add the dependency to your `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'io.vinipx:testng-doc-generator:1.0.1'
+    implementation 'io.vinipx:testng-doc-generator:1.0.2'
 }
 ```
 
