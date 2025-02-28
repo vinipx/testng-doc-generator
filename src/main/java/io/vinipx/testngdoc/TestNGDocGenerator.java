@@ -679,12 +679,45 @@ public class TestNGDocGenerator {
         
         // If there were no comments, or we want to add more information
         if (explanation.length() == 0 || true) {
+            // Check for test case ID pattern (e.g., TC01_, TC02_, etc.)
+            String testCaseId = null;
+            java.util.regex.Pattern tcPattern = java.util.regex.Pattern.compile("^(TC\\d+)_(.*)$");
+            java.util.regex.Matcher matcher = tcPattern.matcher(methodName);
+            
+            if (matcher.find()) {
+                testCaseId = matcher.group(1);
+                methodName = matcher.group(2); // Use the rest of the method name without the TC prefix
+            }
+            
             // Add a general description based on the method name
             explanation.append("This test ");
             
+            // If a test case ID was found, include it
+            if (testCaseId != null) {
+                explanation.append("(").append(testCaseId).append(") ");
+            }
+            
             // Convert camelCase method name to readable format
             String readableMethodName = methodName.replace("test", "").replaceAll("([A-Z])", " $1").toLowerCase().trim();
-            explanation.append(readableMethodName).append(".\n\n");
+            
+            // Handle Gherkin-style method names (given/when/then)
+            if (readableMethodName.contains("given") && readableMethodName.contains("when") && readableMethodName.contains("then")) {
+                // Replace the standard format with a more structured Gherkin format
+                readableMethodName = readableMethodName
+                    .replaceAll("given", "\nGiven ")
+                    .replaceAll("when", "\nWhen ")
+                    .replaceAll("then", "\nThen ")
+                    .replaceAll("test", "")
+                    .trim();
+                
+                explanation = new StringBuilder();
+                if (testCaseId != null) {
+                    explanation.append(testCaseId).append("\n");
+                }
+                explanation.append(readableMethodName).append("\n\n");
+            } else {
+                explanation.append(readableMethodName).append(".\n\n");
+            }
             
             // Look for assertions to understand what's being tested
             for (String line : lines) {
