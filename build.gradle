@@ -1,0 +1,149 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'application'
+}
+
+group = 'com.testngdoc'
+version = '1.0.0'
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // TestNG
+    api 'org.testng:testng:7.7.1'
+    
+    // Reflection utilities
+    implementation 'org.reflections:reflections:0.10.2'
+    
+    // JavaParser for analyzing test method logic
+    implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.25.5'
+    
+    // For generating HTML reports
+    implementation 'org.freemarker:freemarker:2.3.32'
+}
+
+// Keep the application configuration for local development and testing
+application {
+    mainClass = 'com.testngdoc.SimpleTestNGDocGenerator'
+}
+
+// Configure the main JAR
+jar {
+    manifest {
+        attributes(
+            'Main-Class': 'com.testngdoc.SimpleTestNGDocGenerator',
+            'Implementation-Title': 'TestNG Documentation Generator',
+            'Implementation-Version': project.version
+        )
+    }
+    
+    // Include the templates directory in the JAR
+    from('templates') {
+        into 'templates'
+    }
+}
+
+// Create a fat jar with all dependencies
+tasks.register('fatJar', Jar) {
+    archiveClassifier = 'all'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    
+    manifest {
+        attributes(
+            'Main-Class': 'com.testngdoc.SimpleTestNGDocGenerator',
+            'Implementation-Title': 'TestNG Documentation Generator',
+            'Implementation-Version': project.version
+        )
+    }
+    
+    from sourceSets.main.output
+    
+    // Include the templates directory in the fat JAR
+    from('templates') {
+        into 'templates'
+    }
+    
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+}
+
+// Configure Maven publishing
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            
+            pom {
+                name = 'TestNG Documentation Generator'
+                description = 'A library for generating comprehensive documentation for TestNG test classes'
+                url = 'https://github.com/yourusername/testng-doc-generator'
+                
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+                
+                developers {
+                    developer {
+                        id = 'developer'
+                        name = 'Developer Name'
+                        email = 'developer@example.com'
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = 'localRepo'
+            url = layout.buildDirectory.dir('repo')
+        }
+    }
+}
+
+// Add a task to run the application
+tasks.register('runGenerator', JavaExec) {
+    group = 'application'
+    description = 'Run the TestNG documentation generator'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.testngdoc.SimpleTestNGDocGenerator'
+    
+    // Default argument if none provided
+    args 'src/test/java/com/testngdoc/sample'
+    
+    doFirst {
+        println "Running TestNG Documentation Generator..."
+    }
+}
+
+// Add a task to generate sources JAR
+tasks.register('sourcesJar', Jar) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+// Add a task to generate JavaDoc JAR
+tasks.register('javadocJar', Jar) {
+    archiveClassifier = 'javadoc'
+    from javadoc.destinationDir
+    dependsOn javadoc
+}
+
+// Add sources and javadoc JARs to the published artifacts
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+test {
+    useTestNG()
+}

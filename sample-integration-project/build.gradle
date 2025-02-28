@@ -1,0 +1,41 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.example'
+version = '1.0.0'
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+repositories {
+    mavenCentral()
+    mavenLocal() // For accessing locally published libraries
+}
+
+dependencies {
+    // Add the TestNG Documentation Generator as a dependency
+    implementation 'com.testngdoc:testng-doc-generator:1.0.0'
+    
+    // TestNG for writing tests
+    testImplementation 'org.testng:testng:7.7.1'
+}
+
+test {
+    useTestNG()
+}
+
+// Add a task to generate documentation after tests
+task generateTestDocs(type: JavaExec) {
+    group = 'documentation'
+    description = 'Generate TestNG documentation for tests'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.testngdoc.SimpleTestNGDocGenerator'
+    args 'src/test/java/com/example/tests'
+    
+    doFirst {
+        println "Generating TestNG documentation for tests..."
+    }
+}
+
+// Make the task run after tests
+test.finalizedBy generateTestDocs
