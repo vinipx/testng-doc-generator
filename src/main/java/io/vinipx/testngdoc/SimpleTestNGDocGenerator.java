@@ -1,4 +1,4 @@
-package com.testngdoc;
+package io.vinipx.testngdoc;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;

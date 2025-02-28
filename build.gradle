@@ -4,7 +4,7 @@ plugins {
     id 'application'
 }
 
-group = 'com.testngdoc'
+group = 'io.vinipx'
 version = '1.0.0'
 sourceCompatibility = '11'
 targetCompatibility = '11'
@@ -29,14 +29,14 @@ dependencies {
 
 // Keep the application configuration for local development and testing
 application {
-    mainClass = 'com.testngdoc.SimpleTestNGDocGenerator'
+    mainClass = 'io.vinipx.testngdoc.SimpleTestNGDocGenerator'
 }
 
 // Configure the main JAR
 jar {
     manifest {
         attributes(
-            'Main-Class': 'com.testngdoc.SimpleTestNGDocGenerator',
+            'Main-Class': 'io.vinipx.testngdoc.SimpleTestNGDocGenerator',
             'Implementation-Title': 'TestNG Documentation Generator',
             'Implementation-Version': project.version
         )
@@ -55,7 +55,7 @@ tasks.register('fatJar', Jar) {
     
     manifest {
         attributes(
-            'Main-Class': 'com.testngdoc.SimpleTestNGDocGenerator',
+            'Main-Class': 'io.vinipx.testngdoc.SimpleTestNGDocGenerator',
             'Implementation-Title': 'TestNG Documentation Generator',
             'Implementation-Version': project.version
         )
@@ -83,7 +83,7 @@ publishing {
             pom {
                 name = 'TestNG Documentation Generator'
                 description = 'A library for generating comprehensive documentation for TestNG test classes'
-                url = 'https://github.com/yourusername/testng-doc-generator'
+                url = 'https://github.com/vinipx/testng-doc-generator'
                 
                 licenses {
                     license {
@@ -94,9 +94,9 @@ publishing {
                 
                 developers {
                     developer {
-                        id = 'developer'
-                        name = 'Developer Name'
-                        email = 'developer@example.com'
+                        id = 'vinipx'
+                        name = 'Vinicius Fagundes'
+                        email = 'vinipeixotofagundes@gmail.com'
                     }
                 }
             }
@@ -115,7 +115,7 @@ tasks.register('runGenerator', JavaExec) {
     group = 'application'
     description = 'Run the TestNG documentation generator'
     classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'com.testngdoc.SimpleTestNGDocGenerator'
+    mainClass = 'io.vinipx.testngdoc.SimpleTestNGDocGenerator'
     
     // Default argument if none provided
     args 'src/test/java/com/testngdoc/sample'

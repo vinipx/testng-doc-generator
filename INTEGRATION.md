@@ -10,7 +10,7 @@ Add the following dependency to your `pom.xml`:
 
 ```xml
 <dependency>
-    <groupId>com.testngdoc</groupId>
+    <groupId>io.vinipx</groupId>
     <artifactId>testng-doc-generator</artifactId>
     <version>1.0.0</version>
 </dependency>
@@ -22,7 +22,7 @@ Add the following dependency to your `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'com.testngdoc:testng-doc-generator:1.0.0'
+    implementation 'io.vinipx:testng-doc-generator:1.0.0'
 }
 ```
 
@@ -33,7 +33,7 @@ There are several ways to integrate the TestNG Documentation Generator into your
 ### 1. Direct API Usage
 
 ```java
-import com.testngdoc.SimpleTestNGDocGenerator;
+import io.vinipx.testngdoc.SimpleTestNGDocGenerator;
 
 public class DocumentationGenerator {
     public static void main(String[] args) {
@@ -49,7 +49,7 @@ Create a custom TestNG listener that generates documentation after test executio
 
 ```java
 import org.testng.IExecutionListener;
-import com.testngdoc.SimpleTestNGDocGenerator;
+import io.vinipx.testngdoc.SimpleTestNGDocGenerator;
 
 public class DocumentationGeneratorListener implements IExecutionListener {
     @Override
@@ -94,7 +94,7 @@ Add the following to your `pom.xml`:
                         <goal>java</goal>
                     </goals>
                     <configuration>
-                        <mainClass>com.testngdoc.SimpleTestNGDocGenerator</mainClass>
+                        <mainClass>io.vinipx.testngdoc.SimpleTestNGDocGenerator</mainClass>
                         <arguments>
                             <argument>${project.basedir}/src/test/java</argument>
                         </arguments>
@@ -115,7 +115,7 @@ task generateTestNGDocs(type: JavaExec) {
     group = 'documentation'
     description = 'Generate TestNG documentation'
     classpath = configurations.testRuntimeClasspath
-    mainClass = 'com.testngdoc.SimpleTestNGDocGenerator'
+    mainClass = 'io.vinipx.testngdoc.SimpleTestNGDocGenerator'
     args 'src/test/java'
 }
 
@@ -130,7 +130,7 @@ test.finalizedBy generateTestNGDocs
 You can provide your own FreeMarker templates to customize the generated documentation:
 
 ```java
-import com.testngdoc.TestNGDocGenerator;
+import io.vinipx.testngdoc.TestNGDocGenerator;
 import java.nio.file.Paths;
 
 public class CustomDocumentationGenerator {
@@ -151,7 +151,7 @@ public class CustomDocumentationGenerator {
 You can specify a custom output directory for the generated documentation:
 
 ```java
-import com.testngdoc.TestNGDocGenerator;
+import io.vinipx.testngdoc.TestNGDocGenerator;
 import java.nio.file.Paths;
 
 public class CustomDocumentationGenerator {
@@ -178,7 +178,7 @@ stage('Generate TestNG Documentation') {
     steps {
         sh './gradlew generateTestNGDocs'
         // Or for Maven:
-        // sh 'mvn exec:java -Dexec.mainClass="com.testngdoc.SimpleTestNGDocGenerator" -Dexec.args="src/test/java"'
+        // sh 'mvn exec:java -Dexec.mainClass="io.vinipx.testngdoc.SimpleTestNGDocGenerator" -Dexec.args="src/test/java"'
     }
     post {
         success {
@@ -203,7 +203,7 @@ Add the following to your GitHub Actions workflow:
 - name: Generate TestNG Documentation
   run: ./gradlew generateTestNGDocs
   # Or for Maven:
-  # run: mvn exec:java -Dexec.mainClass="com.testngdoc.SimpleTestNGDocGenerator" -Dexec.args="src/test/java"
+  # run: mvn exec:java -Dexec.mainClass="io.vinipx.testngdoc.SimpleTestNGDocGenerator" -Dexec.args="src/test/java"
 
 - name: Archive TestNG Documentation
   uses: actions/upload-artifact@v2

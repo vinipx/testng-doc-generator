@@ -17,6 +17,34 @@ A Java tool that generates comprehensive documentation for TestNG test classes. 
 - Supports multiple theme options (currently Verizon-style theme)
 - Responsive design for mobile and desktop viewing
 
+## Screenshots
+
+Here are some screenshots of the generated documentation:
+
+### Main Index Page
+
+![Main Index Page](docs/images/index-page.png)
+
+*The main index page shows a summary of all test classes with statistics*
+
+### Test Class Detail Page
+
+![Test Class Detail Page](docs/images/class-detail.png)
+
+*The test class detail page shows all test methods with their Gherkin-style formatting*
+
+### Gherkin-Style Formatting Example
+
+![Gherkin Formatting](docs/images/gherkin-formatting.png)
+
+*Example of how test methods with Gherkin-style names are formatted*
+
+> **Note:** To add your own screenshots:
+> 1. Create a `docs/images` directory in the project root
+> 2. Take screenshots of your generated documentation
+> 3. Save the screenshots in the `docs/images` directory
+> 4. Update the image paths in this README if necessary
+
 ## Requirements
 
 - Java 11 or higher
@@ -32,7 +60,7 @@ This project can be used as a library dependency in your test automation framewo
 
 ```xml
 <dependency>
-    <groupId>com.testngdoc</groupId>
+    <groupId>io.vinipx</groupId>
     <artifactId>testng-doc-generator</artifactId>
     <version>1.0.0</version>
 </dependency>
@@ -42,14 +70,14 @@ This project can be used as a library dependency in your test automation framewo
 
 ```groovy
 dependencies {
-    implementation 'com.testngdoc:testng-doc-generator:1.0.0'
+    implementation 'io.vinipx:testng-doc-generator:1.0.0'
 }
 ```
 
 ### Basic Usage
 
 ```java
-import com.testngdoc.SimpleTestNGDocGenerator;
+import io.vinipx.testngdoc.SimpleTestNGDocGenerator;
 
 public class DocumentationGenerator {
     public static void main(String[] args) {
