@@ -1,0 +1,8 @@
+jdk:
+  - openjdk11
+before_install:
+  - cp jitpack-build.gradle build.gradle
+  - ./gradlew wrapper --gradle-version 4.8.1
+  - ./gradlew -version
+install:
+  - ./gradlew clean build publishToMavenLocal
