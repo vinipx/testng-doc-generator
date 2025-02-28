@@ -16,7 +16,7 @@ repositories {
 
 dependencies {
     // Use the TestNG Documentation Generator from JitPack
-    implementation 'com.github.vinipx:testng-doc-generator:v1.0.2'
+    implementation 'com.github.vinipx:testng-doc-generator:v1.0.4'
     
     // Alternatively, use from local Maven repository
     // implementation 'io.vinipx:testng-doc-generator:1.0.0'
