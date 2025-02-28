@@ -56,7 +56,46 @@ This project can be used as a library dependency in your test automation framewo
 
 ### Adding the Dependency
 
-#### Maven
+#### Using JitPack (Recommended)
+
+Add the JitPack repository to your build file:
+
+##### Maven
+
+```xml
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+
+<dependencies>
+    <dependency>
+        <groupId>com.github.vinipx</groupId>
+        <artifactId>testng-doc-generator</artifactId>
+        <version>v1.0.0</version>
+    </dependency>
+</dependencies>
+```
+
+##### Gradle
+
+```groovy
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation 'com.github.vinipx:testng-doc-generator:v1.0.0'
+}
+```
+
+#### From Local Maven Repository
+
+If you've built the project locally, you can use it from your local Maven repository:
+
+##### Maven
 
 ```xml
 <dependency>
@@ -66,7 +105,7 @@ This project can be used as a library dependency in your test automation framewo
 </dependency>
 ```
 
-#### Gradle
+##### Gradle
 
 ```groovy
 dependencies {

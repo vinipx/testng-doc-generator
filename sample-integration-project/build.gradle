@@ -1,41 +1,46 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
-group = 'com.example'
-version = '1.0.0'
+group = 'io.vinipx.sample'
+version = '1.0-SNAPSHOT'
 sourceCompatibility = '11'
 targetCompatibility = '11'
 
 repositories {
     mavenCentral()
-    mavenLocal() // For accessing locally published libraries
+    mavenLocal() // For local testing
+    maven { url 'https://jitpack.io' } // Add JitPack repository
 }
 
 dependencies {
-    // Add the TestNG Documentation Generator as a dependency
-    implementation 'io.vinipx:testng-doc-generator:1.0.0'
+    // Use the TestNG Documentation Generator from JitPack
+    implementation 'com.github.vinipx:testng-doc-generator:v1.0.0'
     
-    // TestNG for writing tests
+    // Alternatively, use from local Maven repository
+    // implementation 'io.vinipx:testng-doc-generator:1.0.0'
+    
+    // TestNG for running tests
     testImplementation 'org.testng:testng:7.7.1'
+}
+
+application {
+    mainClass = 'io.vinipx.sample.GenerateDocumentation'
 }
 
 test {
     useTestNG()
 }
 
-// Add a task to generate documentation after tests
-task generateTestDocs(type: JavaExec) {
+// Add a task to run the documentation generator
+tasks.register('generateDocs', JavaExec) {
     group = 'documentation'
-    description = 'Generate TestNG documentation for tests'
-    classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'io.vinipx.testngdoc.SimpleTestNGDocGenerator'
-    args 'src/test/java/com/example/tests'
+    description = 'Generate TestNG documentation'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'io.vinipx.sample.GenerateDocumentation'
     
     doFirst {
-        println "Generating TestNG documentation for tests..."
+        println "Generating TestNG documentation..."
     }
 }
-
-// Make the task run after tests
-test.finalizedBy generateTestDocs

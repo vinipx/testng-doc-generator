@@ -4,9 +4,58 @@ This guide explains how to integrate the TestNG Documentation Generator into you
 
 ## Adding the Dependency
 
-### Maven
+### Using JitPack (Recommended)
 
-Add the following dependency to your `pom.xml`:
+JitPack is a package repository that builds GitHub projects on demand and publishes ready-to-use packages.
+
+#### Maven
+
+Add the JitPack repository to your `pom.xml`:
+
+```xml
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+```
+
+Then add the dependency:
+
+```xml
+<dependency>
+    <groupId>com.github.vinipx</groupId>
+    <artifactId>testng-doc-generator</artifactId>
+    <version>v1.0.0</version>
+</dependency>
+```
+
+#### Gradle
+
+Add the JitPack repository to your `build.gradle`:
+
+```groovy
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+```
+
+Then add the dependency:
+
+```groovy
+dependencies {
+    implementation 'com.github.vinipx:testng-doc-generator:v1.0.0'
+}
+```
+
+### From Local Maven Repository
+
+If you've built the project locally, you can use it from your local Maven repository:
+
+#### Maven
+
+Add the dependency to your `pom.xml`:
 
 ```xml
 <dependency>
@@ -16,9 +65,9 @@ Add the following dependency to your `pom.xml`:
 </dependency>
 ```
 
-### Gradle
+#### Gradle
 
-Add the following dependency to your `build.gradle`:
+Add the dependency to your `build.gradle`:
 
 ```groovy
 dependencies {

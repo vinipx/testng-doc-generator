@@ -74,11 +74,31 @@ tasks.register('fatJar', Jar) {
     }
 }
 
+// Add a task to generate sources JAR
+tasks.register('sourcesJar', Jar) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+// Add a task to generate JavaDoc JAR
+tasks.register('javadocJar', Jar) {
+    archiveClassifier = 'javadoc'
+    from javadoc.destinationDir
+    dependsOn javadoc
+}
+
 // Configure Maven publishing
 publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
+            
+            // Include the fat JAR
+            artifact fatJar
+            
+            // Include sources and javadoc JARs
+            artifact sourcesJar
+            artifact javadocJar
             
             pom {
                 name = 'TestNG Documentation Generator'
@@ -98,6 +118,12 @@ publishing {
                         name = 'Vinicius Fagundes'
                         email = 'vinipeixotofagundes@gmail.com'
                     }
+                }
+                
+                scm {
+                    connection = 'scm:git:git://github.com/vinipx/testng-doc-generator.git'
+                    developerConnection = 'scm:git:ssh://github.com/vinipx/testng-doc-generator.git'
+                    url = 'https://github.com/vinipx/testng-doc-generator'
                 }
             }
         }
@@ -125,23 +151,11 @@ tasks.register('runGenerator', JavaExec) {
     }
 }
 
-// Add a task to generate sources JAR
-tasks.register('sourcesJar', Jar) {
-    archiveClassifier = 'sources'
-    from sourceSets.main.allJava
-}
-
-// Add a task to generate JavaDoc JAR
-tasks.register('javadocJar', Jar) {
-    archiveClassifier = 'javadoc'
-    from javadoc.destinationDir
-    dependsOn javadoc
-}
-
 // Add sources and javadoc JARs to the published artifacts
 artifacts {
     archives sourcesJar
     archives javadocJar
+    archives fatJar
 }
 
 test {
