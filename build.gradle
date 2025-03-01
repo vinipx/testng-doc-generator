@@ -109,6 +109,14 @@ task demoSourceAndPackageScanning(type: JavaExec) {
     args = ['src/test/java', '--package', 'com.testngdoc.sample']
 }
 
+// Task to test custom title and header
+task testCustomTitle(type: JavaExec) {
+    description = 'Test custom title and header in TestNGDocGenerator'
+    group = 'Demo'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.testngdoc.sample.CustomTitleTest'
+}
+
 task runGenerator(type: JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'com.testngdoc.sample.GenerateDocumentation'
