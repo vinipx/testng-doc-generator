@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>${className} - TestNG Documentation</title>
+    <title>${className} - ${reportTitle}</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -150,9 +150,47 @@
                 padding: 15px;
             }
         }
+        .dark-mode {
+            --background-color: #333333;
+            --text-color: #ffffff;
+            --card-bg-color: #444444;
+            --primary-color: #5d8fdb;
+            --secondary-color: #4a6da7;
+            --accent-color: #304878;
+            --border-color: #555555;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --error-color: #dc3545;
+        }
+        .dark-mode .info-panel {
+            background-color: var(--card-bg-color);
+            color: var(--text-color);
+        }
+        .dark-mode .method {
+            background-color: var(--card-bg-color);
+            color: var(--text-color);
+        }
+        .dark-mode .method-name {
+            color: var(--primary-color);
+        }
+        .dark-mode .method-description {
+            color: var(--text-color);
+        }
+        .dark-mode .method-tags {
+            color: var(--text-color);
+        }
+        .dark-mode .tag {
+            background-color: var(--accent-color);
+            color: var(--text-color);
+        }
+        .dark-mode pre {
+            background-color: #444444;
+            color: var(--text-color);
+            border: 1px solid #555555;
+        }
     </style>
 </head>
-<body>
+<body<#if darkMode> class="dark-mode"</#if>>
     <header>
         <div class="container">
             <h1>${className}</h1>

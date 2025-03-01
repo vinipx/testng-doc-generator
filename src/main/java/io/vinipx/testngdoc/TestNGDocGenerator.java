@@ -303,23 +303,49 @@ public class TestNGDocGenerator {
         }
         
         // If not found in classpath, try to use templates from the file system
+        // Check both the output directory's templates folder and the current directory's templates folder
+        
+        // First check the specified template directory (TEMPLATE_DIR)
         Path templatePath = Paths.get(TEMPLATE_DIR);
-        if (!Files.exists(templatePath)) {
-            try {
-                Files.createDirectories(templatePath);
-                createDefaultTemplates(templatePath);
-                cfg.setDirectoryForTemplateLoading(new File(TEMPLATE_DIR));
-                System.out.println("Created and using default templates in directory: " + templatePath.toAbsolutePath());
-            } catch (IOException e) {
-                System.out.println("Could not create template directory: " + e.getMessage());
-                // Last resort: use classpath resources with default templates
-                cfg.setClassLoaderForTemplateLoading(getClass().getClassLoader(), "templates");
-                System.out.println("Using default templates from classpath resources");
-            }
-        } else {
+        if (Files.exists(templatePath)) {
             // Template directory exists, use it
             cfg.setDirectoryForTemplateLoading(new File(TEMPLATE_DIR));
             System.out.println("Using templates from directory: " + templatePath.toAbsolutePath());
+            return cfg;
+        }
+        
+        // Then check for templates in the output directory
+        Path outputTemplatePath = Paths.get(OUTPUT_DIR, "templates");
+        if (Files.exists(outputTemplatePath)) {
+            // Template directory exists in output directory, use it
+            cfg.setDirectoryForTemplateLoading(outputTemplatePath.toFile());
+            System.out.println("Using templates from output directory: " + outputTemplatePath.toAbsolutePath());
+            return cfg;
+        }
+        
+        // If no templates found, create them in both locations
+        try {
+            // Create templates in the template directory first
+            if (!Files.exists(templatePath)) {
+                Files.createDirectories(templatePath);
+                createDefaultTemplates(templatePath);
+                System.out.println("Created default templates in directory: " + templatePath.toAbsolutePath());
+            }
+            
+            // Also create templates in the output directory for backward compatibility
+            if (!Files.exists(outputTemplatePath)) {
+                Files.createDirectories(outputTemplatePath);
+                createDefaultTemplates(outputTemplatePath);
+                System.out.println("Created default templates in output directory: " + outputTemplatePath.toAbsolutePath());
+            }
+            
+            // Use the templates from the template directory
+            cfg.setDirectoryForTemplateLoading(new File(TEMPLATE_DIR));
+        } catch (IOException e) {
+            System.out.println("Could not create template directories: " + e.getMessage());
+            // Last resort: use classpath resources with default templates
+            cfg.setClassLoaderForTemplateLoading(getClass().getClassLoader(), "templates");
+            System.out.println("Using default templates from classpath resources");
         }
         
         cfg.setDefaultEncoding("UTF-8");
@@ -1590,6 +1616,7 @@ public class TestNGDocGenerator {
             "table {\n" +
             "    width: 100%;\n" +
             "    border-collapse: collapse;\n" +
+            "    border-spacing: 0;\n" +
             "    margin: 24px 0;\n" +
             "    background-color: var(--card-bg-color);\n" +
             "    border-radius: 12px;\n" +
@@ -1616,10 +1643,24 @@ public class TestNGDocGenerator {
             ".dark-mode tr:hover {\n" +
             "    background-color: rgba(255, 255, 255, 0.03);\n" +
             "}\n" +
+            "td:last-child, th:last-child {\n" +
+            "    text-align: center;\n" +
+            "}\n" +
+            "a {\n" +
+            "    color: var(--accent-color);\n" +
+            "    text-decoration: none;\n" +
+            "    font-weight: 500;\n" +
+            "    transition: color 0.3s ease;\n" +
+            "}\n" +
+            "a:hover {\n" +
+            "    color: var(--secondary-color);\n" +
+            "    text-decoration: underline;\n" +
+            "}\n" +
             ".chart-container {\n" +
             "    background-color: var(--card-bg-color);\n" +
             "    border-radius: 12px;\n" +
             "    padding: 24px;\n" +
+            "    margin-bottom: 30px;\n" +
             "    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);\n" +
             "    border: none;\n" +
             "    flex: 1;\n" +
@@ -1647,8 +1688,8 @@ public class TestNGDocGenerator {
             "}\n" +
             ".method-name {\n" +
             "    font-weight: 500;\n" +
-            "    font-size: 1.2rem;\n" +
             "    color: var(--primary-color);\n" +
+            "    font-size: 1.2rem;\n" +
             "    margin-bottom: 16px;\n" +
             "    padding-bottom: 12px;\n" +
             "    border-bottom: 1px solid var(--border-color);\n" +
@@ -1820,104 +1861,92 @@ public class TestNGDocGenerator {
      * @return Filtered list of test methods
      */
     private List<TestMethodInfo> filterTestMethods(List<TestMethodInfo> methods) {
-        if (includeMethodPatterns.isEmpty() && excludeMethodPatterns.isEmpty() && 
-            includeTagPatterns.isEmpty() && excludeTagPatterns.isEmpty()) {
-            // No filtering needed
+        if (methods == null || methods.isEmpty()) {
             return methods;
         }
         
-        return methods.stream()
-            .filter(method -> {
-                // Check exclude method patterns first (if any match, exclude the method)
-                if (!excludeMethodPatterns.isEmpty() && 
-                    excludeMethodPatterns.stream().anyMatch(pattern -> method.getName().matches(pattern))) {
-                    return false;
+        // If no include/exclude patterns are specified, return all methods
+        if (includeMethodPatterns.isEmpty() && excludeMethodPatterns.isEmpty() && 
+            includeTagPatterns.isEmpty() && excludeTagPatterns.isEmpty()) {
+            return methods;
+        }
+        
+        List<TestMethodInfo> filteredMethods = new ArrayList<>();
+        
+        for (TestMethodInfo method : methods) {
+            boolean include = true;
+            
+            // Check method name patterns
+            if (!includeMethodPatterns.isEmpty()) {
+                boolean matchesInclude = false;
+                for (String pattern : includeMethodPatterns) {
+                    if (method.getName().matches(pattern)) {
+                        matchesInclude = true;
+                        break;
+                    }
                 }
-                
-                // Check exclude tag patterns (if any match, exclude the method)
-                if (!excludeTagPatterns.isEmpty() && 
-                    method.getTags().stream().anyMatch(tag -> 
-                        excludeTagPatterns.stream().anyMatch(pattern -> tag.matches(pattern)))) {
-                    return false;
+                include = matchesInclude;
+            }
+            
+            if (include && !excludeMethodPatterns.isEmpty()) {
+                for (String pattern : excludeMethodPatterns) {
+                    if (method.getName().matches(pattern)) {
+                        include = false;
+                        break;
+                    }
                 }
-                
-                // Check include method patterns (if any are specified and none match, exclude the method)
-                if (!includeMethodPatterns.isEmpty() && 
-                    includeMethodPatterns.stream().noneMatch(pattern -> method.getName().matches(pattern))) {
-                    return false;
+            }
+            
+            // Check tag patterns
+            if (include && !includeTagPatterns.isEmpty() && !method.getTags().isEmpty()) {
+                boolean matchesIncludeTag = false;
+                for (String tag : method.getTags()) {
+                    for (String pattern : includeTagPatterns) {
+                        if (tag.matches(pattern)) {
+                            matchesIncludeTag = true;
+                            break;
+                        }
+                    }
+                    if (matchesIncludeTag) break;
                 }
-                
-                // Check include tag patterns (if any are specified and none match, exclude the method)
-                if (!includeTagPatterns.isEmpty() && 
-                    (method.getTags().isEmpty() || 
-                     method.getTags().stream().noneMatch(tag -> 
-                        includeTagPatterns.stream().anyMatch(pattern -> tag.matches(pattern))))) {
-                    return false;
+                include = matchesIncludeTag;
+            }
+            
+            if (include && !excludeTagPatterns.isEmpty() && !method.getTags().isEmpty()) {
+                for (String tag : method.getTags()) {
+                    for (String pattern : excludeTagPatterns) {
+                        if (tag.matches(pattern)) {
+                            include = false;
+                            break;
+                        }
+                    }
+                    if (!include) break;
                 }
-                
-                // Include the method if it passed all filters
-                return true;
-            })
-            .collect(Collectors.toList());
+            }
+            
+            if (include) {
+                filteredMethods.add(method);
+            }
+        }
+        
+        return filteredMethods;
     }
 
     /**
-     * Set a custom pattern replacement map for improving readability of test documentation.
-     * Keys in the map represent patterns to find, and values represent their replacements.
-     * 
-     * @param patternReplacements Map with pattern replacements (pattern -&gt; replacement)
-     * @return This TestNGDocGenerator instance for method chaining
-     */
-    public TestNGDocGenerator setPatternReplacements(Map<String, String> patternReplacements) {
-        this.patternReplacements = patternReplacements;
-        return this;
-    }
-    
-    /**
-     * Add a single pattern replacement for improving readability of test documentation.
-     * 
-     * @param pattern The pattern to find
-     * @param replacement The replacement text
-     * @return This TestNGDocGenerator instance for method chaining
-     */
-    public TestNGDocGenerator addPatternReplacement(String pattern, String replacement) {
-        this.patternReplacements.put(pattern, replacement);
-        return this;
-    }
-    
-    /**
-     * Clear all pattern replacements.
+     * Enable dark mode for the documentation
      * 
      * @return This TestNGDocGenerator instance for method chaining
-     */
-    public TestNGDocGenerator clearPatternReplacements() {
-        this.patternReplacements.clear();
-        return this;
-    }
-    
-    /**
-     * Get the current pattern replacement map.
-     * 
-     * @return The current pattern replacement map
-     */
-    public Map<String, String> getPatternReplacements() {
-        return new HashMap<>(this.patternReplacements);
-    }
-
-    /**
-     * Enables dark mode for the generated documentation.
-     *
-     * @return the TestNGDocGenerator instance for method chaining
      */
     public TestNGDocGenerator useDarkMode() {
-        return useDarkMode(true);
+        this.darkMode = true;
+        return this;
     }
-
+    
     /**
-     * Sets the dark mode setting for the generated documentation.
-     *
-     * @param enabled whether dark mode should be enabled
-     * @return the TestNGDocGenerator instance for method chaining
+     * Set dark mode for the documentation
+     * 
+     * @param enabled Whether dark mode should be enabled or disabled
+     * @return This TestNGDocGenerator instance for method chaining
      */
     public TestNGDocGenerator useDarkMode(boolean enabled) {
         this.darkMode = enabled;
@@ -1925,127 +1954,72 @@ public class TestNGDocGenerator {
     }
 
     /**
-     * Set whether to display a pie chart of tag statistics on the index page
-     * @param display True to display the chart, false to hide it
-     * @return This TestNGDocGenerator instance for chaining
+     * Get the template directory, creating it if it doesn't exist
      */
-    public TestNGDocGenerator displayTagsChart(boolean display) {
-        this.displayTagsChart = display;
-        return this;
-    }
-
-    /**
-     * Enable the tag statistics chart on the index page
-     * @return This TestNGDocGenerator instance for chaining
-     */
-    public TestNGDocGenerator displayTagsChart() {
-        return displayTagsChart(true);
-    }
-
-    /**
-     * Sets a custom title for the documentation report.
-     * This will replace the default "TestNG Documentation" title.
-     *
-     * @param title the custom report title
-     * @return the TestNGDocGenerator instance for method chaining
-     */
-    public TestNGDocGenerator setReportTitle(String title) {
-        if (title != null && !title.trim().isEmpty()) {
-            this.reportTitle = title.trim();
+    private File getTemplateDirectory() {
+        File templateDir = new File(TEMPLATE_DIR);
+        if (!templateDir.exists()) {
+            System.out.println("Template directory does not exist. Creating: " + templateDir.getAbsolutePath());
+            boolean created = templateDir.mkdirs();
+            if (!created) {
+                System.err.println("Failed to create template directory: " + templateDir.getAbsolutePath());
+            }
         }
-        return this;
+        return templateDir;
     }
 
     /**
-     * Sets a custom header text to be displayed below the title in the documentation report.
-     *
-     * @param header the custom header text
-     * @return the TestNGDocGenerator instance for method chaining
+     * Ensures that template files exist, creating them from classpath resources if they don't
      */
-    public TestNGDocGenerator setReportHeader(String header) {
-        this.reportHeader = header;
-        return this;
+    private void ensureTemplateFilesExist() {
+        // Create templates in the main template directory
+        ensureTemplateFilesExistInDirectory(new File(TEMPLATE_DIR));
+        
+        // Also create templates in the output directory for backward compatibility
+        ensureTemplateFilesExistInDirectory(new File(OUTPUT_DIR, "templates"));
     }
-
+    
     /**
-     * Set the output directory for the generated documentation
-     * 
-     * @param outputDir The directory where documentation will be generated
-     * @return This TestNGDocGenerator instance for method chaining
+     * Ensures that template files exist in the specified directory, creating them from classpath resources if they don't
      */
-    public TestNGDocGenerator setOutputDirectory(String outputDir) {
-        OUTPUT_DIR = outputDir;
-        return this;
-    }
-
-    /**
-     * Add a pattern to include test methods whose names match the pattern.
-     * Only methods matching at least one include pattern will be included in the documentation.
-     * If no include patterns are specified, all methods will be included (unless excluded).
-     * 
-     * @param pattern Regular expression pattern to match method names
-     * @return This TestNGDocGenerator instance for method chaining
-     */
-    public TestNGDocGenerator includeMethodPattern(String pattern) {
-        if (pattern != null && !pattern.trim().isEmpty()) {
-            this.includeMethodPatterns.add(pattern.trim());
+    private void ensureTemplateFilesExistInDirectory(File templateDir) {
+        if (!templateDir.exists()) {
+            System.out.println("Template directory does not exist. Creating: " + templateDir.getAbsolutePath());
+            boolean created = templateDir.mkdirs();
+            if (!created) {
+                System.err.println("Failed to create template directory: " + templateDir.getAbsolutePath());
+                return;
+            }
         }
-        return this;
-    }
-
-    /**
-     * Add a pattern to exclude test methods whose names match the pattern.
-     * Methods matching any exclude pattern will be excluded from the documentation.
-     * 
-     * @param pattern Regular expression pattern to match method names
-     * @return This TestNGDocGenerator instance for method chaining
-     */
-    public TestNGDocGenerator excludeMethodPattern(String pattern) {
-        if (pattern != null && !pattern.trim().isEmpty()) {
-            this.excludeMethodPatterns.add(pattern.trim());
+        
+        // List of template files to check/create
+        String[] templateFiles = {"index.ftl", "class.ftl"};
+        
+        for (String templateFile : templateFiles) {
+            File file = new File(templateDir, templateFile);
+            
+            if (!file.exists()) {
+                System.out.println("Template file does not exist. Creating: " + file.getAbsolutePath());
+                
+                try (InputStream is = getClass().getResourceAsStream("/templates/" + templateFile);
+                     FileOutputStream fos = new FileOutputStream(file)) {
+                    
+                    if (is == null) {
+                        System.err.println("Could not find template resource: /templates/" + templateFile);
+                        continue;
+                    }
+                    
+                    byte[] buffer = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = is.read(buffer)) != -1) {
+                        fos.write(buffer, 0, bytesRead);
+                    }
+                    
+                    System.out.println("Created template file: " + file.getAbsolutePath());
+                } catch (IOException e) {
+                    System.err.println("Error creating template file: " + file.getAbsolutePath() + " - " + e.getMessage());
+                }
+            }
         }
-        return this;
-    }
-
-    /**
-     * Add a pattern to include test methods with tags matching the pattern.
-     * Only methods with at least one tag matching an include pattern will be included in the documentation.
-     * If no include tag patterns are specified, all methods will be included (unless excluded).
-     * 
-     * @param pattern Regular expression pattern to match tags
-     * @return This TestNGDocGenerator instance for method chaining
-     */
-    public TestNGDocGenerator includeTagPattern(String pattern) {
-        if (pattern != null && !pattern.trim().isEmpty()) {
-            this.includeTagPatterns.add(pattern.trim());
-        }
-        return this;
-    }
-
-    /**
-     * Add a pattern to exclude test methods with tags matching the pattern.
-     * Methods with any tag matching an exclude pattern will be excluded from the documentation.
-     * 
-     * @param pattern Regular expression pattern to match tags
-     * @return This TestNGDocGenerator instance for method chaining
-     */
-    public TestNGDocGenerator excludeTagPattern(String pattern) {
-        if (pattern != null && !pattern.trim().isEmpty()) {
-            this.excludeTagPatterns.add(pattern.trim());
-        }
-        return this;
-    }
-
-    /**
-     * Clear all method filtering patterns.
-     * 
-     * @return This TestNGDocGenerator instance for method chaining
-     */
-    public TestNGDocGenerator clearMethodFilters() {
-        this.includeMethodPatterns.clear();
-        this.excludeMethodPatterns.clear();
-        this.includeTagPatterns.clear();
-        this.excludeTagPatterns.clear();
-        return this;
     }
 }
