@@ -88,13 +88,20 @@
         a:hover {
             text-decoration: underline;
         }
+        .summary-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
         .summary {
             background-color: var(--card-bg-color);
             border-radius: 8px;
             padding: 20px;
-            margin-bottom: 30px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
             border: 1px solid var(--border-color);
+            flex: 1;
+            min-width: 300px;
         }
         table {
             width: 100%;
@@ -119,12 +126,15 @@
             background-color: rgba(0, 0, 0, 0.05);
         }
         .chart-container {
-            margin: 30px 0;
             background-color: var(--card-bg-color);
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
             border: 1px solid var(--border-color);
+            flex: 1;
+            min-width: 300px;
+            max-width: 500px;
+            height: 100%;
         }
         .chart-title {
             text-align: center;
@@ -147,11 +157,18 @@
             th, td {
                 padding: 8px 10px;
             }
+            .summary-container {
+                flex-direction: column;
+            }
+            .chart-container {
+                max-width: 100%;
+            }
         }
     </style>
     <#if displayTagsChart>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     </#if>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <header>
@@ -163,10 +180,19 @@
         </div>
     </header>
     <div class="container">
-        <div class="summary">
-            <h2>Summary</h2>
-            <p><strong>Total Test Classes:</strong> ${testClasses?size}</p>
-            <p><strong>Total Test Methods:</strong> ${totalMethods}</p>
+        <div class="summary-container">
+            <div class="summary">
+                <h2>Summary</h2>
+                <p><strong>Total Test Classes:</strong> ${testClasses?size}</p>
+                <p><strong>Total Test Methods:</strong> ${totalMethods}</p>
+            </div>
+            
+            <#if displayTagsChart && tagPercentages?? && tagPercentages?size gt 0>
+            <div class="chart-container">
+                <h3 class="chart-title">Test Tags Distribution</h3>
+                <canvas id="tagsChart"></canvas>
+            </div>
+            </#if>
         </div>
         
         <h2>Test Classes</h2>
@@ -188,10 +214,6 @@
         </table>
         
         <#if displayTagsChart && tagPercentages?? && tagPercentages?size gt 0>
-        <div class="chart-container">
-            <h3 class="chart-title">Test Tags Distribution</h3>
-            <canvas id="tagsChart" width="400" height="400"></canvas>
-        </div>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 var ctx = document.getElementById('tagsChart').getContext('2d');
@@ -210,7 +232,7 @@
                     },
                     options: {
                         responsive: true,
-                        maintainAspectRatio: false,
+                        maintainAspectRatio: true,
                         plugins: {
                             legend: {
                                 position: 'right',

@@ -1197,6 +1197,20 @@ public class TestNGDocGenerator {
                 template.process(dataModel, out);
             }
         }
+        
+        // Copy CSS to ensure styles are properly loaded when used as a dependency
+        try {
+            Path cssDir = Paths.get(OUTPUT_DIR, "css");
+            if (!Files.exists(cssDir)) {
+                Files.createDirectories(cssDir);
+            }
+            
+            // Create a comprehensive CSS file with all styles
+            String cssContent = generateComprehensiveCSS();
+            Files.write(cssDir.resolve("styles.css"), cssContent.getBytes());
+        } catch (IOException e) {
+            System.out.println("Warning: Could not create CSS file: " + e.getMessage());
+        }
     }
 
     private void generateIndexPage(List<TestClassInfo> testClasses, Configuration cfg) 
@@ -1248,6 +1262,179 @@ public class TestNGDocGenerator {
         try (Writer out = new FileWriter(new File(OUTPUT_DIR, "index.html"))) {
             template.process(dataModel, out);
         }
+    }
+
+    /**
+     * Generates a comprehensive CSS file with all necessary styles for the documentation
+     * @return String containing the complete CSS content
+     */
+    private String generateComprehensiveCSS() {
+        return "/* TestNG Documentation Generator Styles */\n" +
+            ":root {\n" +
+            "    --primary-color: #4a6da7;\n" +
+            "    --secondary-color: #304878;\n" +
+            "    --accent-color: #5d8fdb;\n" +
+            "    --background-color: #f8f9fa;\n" +
+            "    --card-bg-color: #ffffff;\n" +
+            "    --text-color: #333333;\n" +
+            "    --border-color: #e1e4e8;\n" +
+            "    --success-color: #28a745;\n" +
+            "    --warning-color: #ffc107;\n" +
+            "    --error-color: #dc3545;\n" +
+            "}\n" +
+            "/* Dark mode variables */\n" +
+            ".dark-mode {\n" +
+            "    --primary-color: #6d8cbf;\n" +
+            "    --secondary-color: #4a6da7;\n" +
+            "    --accent-color: #7fa8e0;\n" +
+            "    --background-color: #1a1a1a;\n" +
+            "    --card-bg-color: #2d2d2d;\n" +
+            "    --text-color: #e0e0e0;\n" +
+            "    --border-color: #444444;\n" +
+            "    --success-color: #48c774;\n" +
+            "    --warning-color: #ffdd57;\n" +
+            "    --error-color: #f14668;\n" +
+            "}\n" +
+            "* {\n" +
+            "    box-sizing: border-box;\n" +
+            "    margin: 0;\n" +
+            "    padding: 0;\n" +
+            "}\n" +
+            "body {\n" +
+            "    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;\n" +
+            "    line-height: 1.6;\n" +
+            "    color: var(--text-color);\n" +
+            "    background-color: var(--background-color);\n" +
+            "    padding: 0;\n" +
+            "    margin: 0;\n" +
+            "}\n" +
+            ".container {\n" +
+            "    max-width: 1200px;\n" +
+            "    margin: 0 auto;\n" +
+            "    padding: 20px;\n" +
+            "}\n" +
+            "header {\n" +
+            "    background-color: var(--primary-color);\n" +
+            "    color: white;\n" +
+            "    padding: 20px 0;\n" +
+            "    margin-bottom: 30px;\n" +
+            "    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);\n" +
+            "}\n" +
+            "h1 {\n" +
+            "    font-size: 2.2rem;\n" +
+            "    margin-bottom: 10px;\n" +
+            "    color: white;\n" +
+            "}\n" +
+            "h2 {\n" +
+            "    font-size: 1.8rem;\n" +
+            "    margin: 25px 0 15px;\n" +
+            "    color: var(--primary-color);\n" +
+            "    border-bottom: 2px solid var(--border-color);\n" +
+            "    padding-bottom: 10px;\n" +
+            "}\n" +
+            "h3 {\n" +
+            "    font-size: 1.4rem;\n" +
+            "    margin: 20px 0 10px;\n" +
+            "    color: var(--primary-color);\n" +
+            "}\n" +
+            "a {\n" +
+            "    color: var(--accent-color);\n" +
+            "    text-decoration: none;\n" +
+            "}\n" +
+            "a:hover {\n" +
+            "    text-decoration: underline;\n" +
+            "}\n" +
+            ".summary-container {\n" +
+            "    display: flex;\n" +
+            "    flex-wrap: wrap;\n" +
+            "    gap: 20px;\n" +
+            "    margin-bottom: 30px;\n" +
+            "}\n" +
+            ".summary {\n" +
+            "    background-color: var(--card-bg-color);\n" +
+            "    border-radius: 8px;\n" +
+            "    padding: 20px;\n" +
+            "    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);\n" +
+            "    border: 1px solid var(--border-color);\n" +
+            "    flex: 1;\n" +
+            "    min-width: 300px;\n" +
+            "}\n" +
+            "table {\n" +
+            "    width: 100%;\n" +
+            "    border-collapse: collapse;\n" +
+            "    margin: 20px 0;\n" +
+            "    background-color: var(--card-bg-color);\n" +
+            "    border-radius: 8px;\n" +
+            "    overflow: hidden;\n" +
+            "    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);\n" +
+            "}\n" +
+            "th {\n" +
+            "    background-color: var(--secondary-color);\n" +
+            "    color: white;\n" +
+            "    text-align: left;\n" +
+            "    padding: 12px 15px;\n" +
+            "}\n" +
+            "td {\n" +
+            "    padding: 10px 15px;\n" +
+            "    border-top: 1px solid var(--border-color);\n" +
+            "}\n" +
+            "tr:hover {\n" +
+            "    background-color: rgba(0, 0, 0, 0.05);\n" +
+            "}\n" +
+            ".chart-container {\n" +
+            "    background-color: var(--card-bg-color);\n" +
+            "    border-radius: 8px;\n" +
+            "    padding: 20px;\n" +
+            "    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);\n" +
+            "    border: 1px solid var(--border-color);\n" +
+            "    flex: 1;\n" +
+            "    min-width: 300px;\n" +
+            "    max-width: 500px;\n" +
+            "    height: 100%;\n" +
+            "}\n" +
+            ".method {\n" +
+            "    background-color: var(--card-bg-color);\n" +
+            "    border: 1px solid var(--border-color);\n" +
+            "    border-radius: 5px;\n" +
+            "    padding: 20px;\n" +
+            "    margin-bottom: 20px;\n" +
+            "    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);\n" +
+            "}\n" +
+            ".method-name {\n" +
+            "    font-weight: 600;\n" +
+            "    font-size: 1.2rem;\n" +
+            "    color: var(--primary-color);\n" +
+            "    margin-bottom: 15px;\n" +
+            "    padding-bottom: 10px;\n" +
+            "    border-bottom: 1px solid var(--border-color);\n" +
+            "}\n" +
+            ".method-description {\n" +
+            "    color: var(--text-color);\n" +
+            "}\n" +
+            "@media (max-width: 768px) {\n" +
+            "    .container {\n" +
+            "        padding: 15px;\n" +
+            "    }\n" +
+            "    h1 {\n" +
+            "        font-size: 1.8rem;\n" +
+            "    }\n" +
+            "    h2 {\n" +
+            "        font-size: 1.5rem;\n" +
+            "    }\n" +
+            "    table {\n" +
+            "        display: block;\n" +
+            "        overflow-x: auto;\n" +
+            "    }\n" +
+            "    th, td {\n" +
+            "        padding: 8px 10px;\n" +
+            "    }\n" +
+            "    .summary-container {\n" +
+            "        flex-direction: column;\n" +
+            "    }\n" +
+            "    .chart-container {\n" +
+            "        max-width: 100%;\n" +
+            "    }\n" +
+            "}";
     }
 
     /**
