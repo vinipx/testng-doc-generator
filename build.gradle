@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'application'
+    id 'maven-publish'
 }
 
 group = 'io.vinipx'
@@ -114,4 +115,60 @@ jar {
     from('templates') {
         into 'templates'
     }
+}
+
+// Maven publication configuration for JitPack
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = project.group
+            artifactId = project.name
+            version = project.version
+            
+            from components.java
+            
+            pom {
+                name = 'TestNG Documentation Generator'
+                description = 'A Java tool that generates comprehensive documentation for TestNG test classes'
+                url = 'https://github.com/vinipx/testng-doc-generator'
+                
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+                
+                developers {
+                    developer {
+                        id = 'vinipx'
+                        name = 'vinipx'
+                        email = 'vinipx@example.com'
+                    }
+                }
+                
+                scm {
+                    connection = 'scm:git:git://github.com/vinipx/testng-doc-generator.git'
+                    developerConnection = 'scm:git:ssh://github.com:vinipx/testng-doc-generator.git'
+                    url = 'https://github.com/vinipx/testng-doc-generator/tree/main'
+                }
+            }
+        }
+    }
+}
+
+// Task to help with JitPack publication
+task sourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar) {
+    archiveClassifier.set('javadoc')
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
 }
