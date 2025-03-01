@@ -1042,7 +1042,7 @@ public class TestNGDocGenerator {
      * Set a custom pattern replacement map for improving readability of test documentation.
      * Keys in the map represent patterns to find, and values represent their replacements.
      * 
-     * @param patternReplacements Map with pattern replacements (pattern -> replacement)
+     * @param patternReplacements Map with pattern replacements (pattern -&gt; replacement)
      * @return This TestNGDocGenerator instance for method chaining
      */
     public TestNGDocGenerator setPatternReplacements(Map<String, String> patternReplacements) {
