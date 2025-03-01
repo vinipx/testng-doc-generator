@@ -55,13 +55,13 @@ Here are some screenshots of the generated documentation:
 
 ### Tag Statistics Chart
 
-![Tag Statistics Chart](docs/images/tag-chart.png)
+![Tag Statistics Chart](docs/images/index-page.png)
 
 *Interactive pie chart showing the distribution of test tags across the test suite*
 
 ### Dark Mode
 
-![Dark Mode](docs/images/dark-mode.png)
+![Dark Mode](docs/images/class-detail.png)
 
 *Dark mode interface for better readability in low-light environments*
 
