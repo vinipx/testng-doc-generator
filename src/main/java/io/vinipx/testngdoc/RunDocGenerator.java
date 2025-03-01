@@ -5,14 +5,22 @@ import java.util.List;
 
 /**
  * Simple class to run the TestNGDocGenerator
+ * 
+ * Usage:
+ * java -jar testng-doc-generator.jar <source-directory> [<additional-source-directory>...] [--package <package-name>...] [--output <output-directory>]
+ * 
+ * Options:
+ * --package <package-name>     Specify a package to scan for TestNG classes
+ * --output <output-directory>  Specify the output directory for the generated documentation (default: testng-docs)
  */
 public class RunDocGenerator {
     
     public static void main(String[] args) {
         if (args.length < 1) {
-            System.out.println("Usage: java -jar testng-doc-generator.jar <source-directory> [<additional-source-directory>...] [--package <package-name>...]");
+            System.out.println("Usage: java -jar testng-doc-generator.jar <source-directory> [<additional-source-directory>...] [--package <package-name>...] [--output <output-directory>]");
             System.out.println("Options:");
             System.out.println("  --package <package-name>  Specify a package to scan for TestNG classes");
+            System.out.println("  --output <output-directory>  Specify the output directory for the generated documentation");
             System.exit(1);
         }
         
@@ -20,20 +28,26 @@ public class RunDocGenerator {
             TestNGDocGenerator generator = new TestNGDocGenerator()
                 .useDarkMode(true)
                 .displayTagsChart()
-                .setReportTitle("TestNG Documentation v1.2.3")
+                .setReportTitle("TestNG Documentation v1.2.4")
                 .setReportHeader("Generated on " + java.time.LocalDate.now() + " with custom settings");
             
             // Parse arguments to separate source directories and packages
             List<String> sourceDirectories = new ArrayList<>();
             List<String> packages = new ArrayList<>();
+            String outputDir = "testng-docs"; // Default output directory
             
             for (int i = 0; i < args.length; i++) {
                 if (args[i].equals("--package") && i + 1 < args.length) {
                     packages.add(args[++i]);
+                } else if (args[i].equals("--output") && i + 1 < args.length) {
+                    outputDir = args[++i];
                 } else {
                     sourceDirectories.add(args[i]);
                 }
             }
+            
+            // Set the output directory
+            generator.setOutputDirectory(outputDir);
             
             // Convert lists to arrays
             String[] sourceDirectoriesArray = sourceDirectories.toArray(new String[0]);

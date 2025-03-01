@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>${className} - ${reportTitle}</title>
+    <title>SimpleTestNGDocGeneratorUnitTest - Custom Output Example</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root {
-            <#if darkMode>
             --primary-color: #3a5a8c;
             --secondary-color: #2c4a7c;
             --accent-color: #4d7ab8;
@@ -18,19 +17,6 @@
             --warning-color: #ffc107;
             --error-color: #dc3545;
             --code-bg-color: #2a2a2a;
-            <#else>
-            --primary-color: #4a6da7;
-            --secondary-color: #304878;
-            --accent-color: #5d8fdb;
-            --background-color: #f8f9fa;
-            --card-bg-color: #ffffff;
-            --text-color: #333333;
-            --border-color: #e1e4e8;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --error-color: #dc3545;
-            --code-bg-color: #f6f8fa;
-            </#if>
         }
         * {
             box-sizing: border-box;
@@ -166,10 +152,8 @@
 <body>
     <header>
         <div class="container">
-            <h1>${className}</h1>
-            <#if reportHeader??>
-                <div class="header-note">${reportHeader}</div>
-            </#if>
+            <h1>SimpleTestNGDocGeneratorUnitTest</h1>
+                <div class="header-note">Documentation with custom output directory</div>
             <div class="nav">
                 <a href="index.html">Back to Index</a>
             </div>
@@ -177,27 +161,82 @@
     </header>
     <div class="container">
         <div class="info-panel">
-            <p><strong>Package:</strong> ${packageName}</p>
-            <p><strong>Number of Test Methods:</strong> ${testMethods?size}</p>
-            <p><strong>Percentage of Total:</strong> ${percentage}%</p>
+            <p><strong>Package:</strong> io.vinipx.testngdoc</p>
+            <p><strong>Number of Test Methods:</strong> 5</p>
+            <p><strong>Percentage of Total:</strong> 13.5%</p>
         </div>
         
         <h2>Test Methods</h2>
-        <#list testMethods as method>
         <div class="method">
-            <div class="method-name">${method.name}</div>
-            <#if method.tags?? && method.tags?size gt 0>
-            <div class="tags-container">
-                <#list method.tags as tag>
-                <span class="tag">${tag}</span>
-                </#list>
-            </div>
-            </#if>
+            <div class="method-name">testGenerateHumanReadableExplanationForCamelCase</div>
             <div class="method-description">
-                <pre>${method.description}</pre>
+                <pre>Test with a simple camelCase method name
+Verify the result
+This test generate human readable explanation for camel case.
+
+- Confirms that // Test method\nAssert.assertTrue(true);
+- Confirms that Should contain the method name without 'test'
+- Ensures that Should not contain camelCase
+</pre>
             </div>
         </div>
-        </#list>
+        <div class="method">
+            <div class="method-name">testGenerateHumanReadableExplanationForUnderscores</div>
+            <div class="method-description">
+                <pre>Test with an underscore-separated method name
+Verify the result
+This test generate human readable explanation for underscores.
+
+- Confirms that // Test method\nAssert.assertTrue(true);
+- Confirms that Should contain spaces instead of underscores
+- Ensures that Should not contain underscores
+</pre>
+            </div>
+        </div>
+        <div class="method">
+            <div class="method-name">testGenerateHumanReadableExplanationForTCPrefix</div>
+            <div class="method-description">
+                <pre>Test with a TC-prefixed method name
+Verify the result
+This test generate human readable explanation for t c prefix.
+
+- Confirms that // Test method\nAssert.assertTrue(true);
+- Confirms that Should extract the test case ID
+- Confirms that Should contain the method name without the TC prefix
+</pre>
+            </div>
+        </div>
+        <div class="method">
+            <div class="method-name">testGenerateHumanReadableExplanationForGherkinStyle</div>
+            <div class="method-description">
+                <pre>Test with a Gherkin-style method name
+Verify the result
+This test generate human readable explanation for gherkin style.
+
+- Confirms that // Test method\nAssert.assertTrue(true);
+- Confirms that Should contain the original method name
+- Confirms that Should format with Given
+- Confirms that Should format with When
+- Confirms that Should format with Then
+</pre>
+            </div>
+        </div>
+        <div class="method">
+            <div class="method-name">testGenerateHumanReadableExplanationForTCPrefixedGherkinStyle</div>
+            <div class="method-description">
+                <pre>Test with a TC-prefixed Gherkin-style method name
+Verify the result
+This test generate human readable explanation for t c prefixed gherkin style.
+
+- Confirms that // Test method\nAssert.assertTrue(true);
+- Confirms that Should contain the original method name
+- Confirms that Should extract the test case ID
+- Confirms that Should format with Given
+- Confirms that Should format with When
+- Confirms that Should format with Then
+</pre>
+            </div>
+        </div>
     </div>
 </body>
 </html>

@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'io.vinipx'
-version = '1.2.3'
+version = '1.2.4'
 sourceCompatibility = '11'
 targetCompatibility = '11'
 
@@ -139,6 +139,20 @@ task testStyles(type: JavaExec) {
     mainClass = 'com.testngdoc.sample.StyleTestGenerator'
 }
 
+task testTemplateLoading(type: JavaExec) {
+    description = 'Test template loading mechanism when used as a library'
+    group = 'Demo'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.testngdoc.sample.TemplateLoadingTest'
+}
+
+task testCustomOutputDirectory(type: JavaExec) {
+    description = 'Test custom output directory functionality'
+    group = 'Demo'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.testngdoc.sample.CustomOutputDirectoryExample'
+}
+
 // Configure Java artifacts
 java {
     withJavadocJar()  // Generate Javadoc JAR
@@ -157,6 +171,11 @@ jar {
     
     // Include the templates directory in the JAR
     from('templates') {
+        into 'templates'
+    }
+    
+    // Ensure src/main/resources/templates are also included
+    from('src/main/resources/templates') {
         into 'templates'
     }
 }

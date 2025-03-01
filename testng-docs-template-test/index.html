@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>${reportTitle}</title>
+    <title>Template Loading Test</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root {
-            <#if darkMode>
             --primary-color: #3a5a8c;
             --secondary-color: #2c4a7c;
             --accent-color: #4d7ab8;
@@ -17,18 +16,6 @@
             --success-color: #28a745;
             --warning-color: #ffc107;
             --error-color: #dc3545;
-            <#else>
-            --primary-color: #4a6da7;
-            --secondary-color: #304878;
-            --accent-color: #5d8fdb;
-            --background-color: #f8f9fa;
-            --card-bg-color: #ffffff;
-            --text-color: #333333;
-            --border-color: #e1e4e8;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --error-color: #dc3545;
-            </#if>
         }
         * {
             box-sizing: border-box;
@@ -149,21 +136,20 @@
             }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <header>
         <div class="container">
-            <h1>${reportTitle}</h1>
-            <#if reportHeader??>
-                <div class="header-note">${reportHeader}</div>
-            </#if>
+            <h1>Template Loading Test</h1>
+                <div class="header-note">Testing template loading from classpath resources</div>
         </div>
     </header>
     <div class="container">
         <div class="summary">
             <h2>Summary</h2>
-            <p><strong>Total Test Classes:</strong> ${testClasses?size}</p>
-            <p><strong>Total Test Methods:</strong> ${totalMethods}</p>
+            <p><strong>Total Test Classes:</strong> 10</p>
+            <p><strong>Total Test Methods:</strong> 37</p>
         </div>
         
         <h2>Test Classes</h2>
@@ -174,31 +160,81 @@
                 <th>Test Methods</th>
                 <th>Percentage</th>
             </tr>
-            <#list testClasses as class>
             <tr>
-                <td><a href="${class.className}.html">${class.className}</a></td>
-                <td>${class.packageName}</td>
-                <td>${class.testMethods?size}</td>
-                <td>${class.percentage}%</td>
+                <td><a href="SimpleTestNGDocGeneratorUnitTest.html">SimpleTestNGDocGeneratorUnitTest</a></td>
+                <td>io.vinipx.testngdoc</td>
+                <td>5</td>
+                <td>13.5%</td>
             </tr>
-            </#list>
+            <tr>
+                <td><a href="TestNGDocGeneratorTest.html">TestNGDocGeneratorTest</a></td>
+                <td>io.vinipx.testngdoc</td>
+                <td>1</td>
+                <td>2.7%</td>
+            </tr>
+            <tr>
+                <td><a href="TestNGDocGeneratorUnitTest.html">TestNGDocGeneratorUnitTest</a></td>
+                <td>io.vinipx.testngdoc</td>
+                <td>5</td>
+                <td>13.5%</td>
+            </tr>
+            <tr>
+                <td><a href="TaggedTests.html">TaggedTests</a></td>
+                <td>com.testngdoc.sample</td>
+                <td>5</td>
+                <td>13.5%</td>
+            </tr>
+            <tr>
+                <td><a href="UserProfileTests.html">UserProfileTests</a></td>
+                <td>com.testngdoc.sample</td>
+                <td>3</td>
+                <td>8.1%</td>
+            </tr>
+            <tr>
+                <td><a href="LoginTests.html">LoginTests</a></td>
+                <td>com.testngdoc.sample</td>
+                <td>4</td>
+                <td>10.8%</td>
+            </tr>
+            <tr>
+                <td><a href="APITests.html">APITests</a></td>
+                <td>com.testngdoc.sample</td>
+                <td>4</td>
+                <td>10.8%</td>
+            </tr>
+            <tr>
+                <td><a href="GherkinStyleTests.html">GherkinStyleTests</a></td>
+                <td>com.testngdoc.sample</td>
+                <td>4</td>
+                <td>10.8%</td>
+            </tr>
+            <tr>
+                <td><a href="TCPrefixTests.html">TCPrefixTests</a></td>
+                <td>com.testngdoc.sample</td>
+                <td>3</td>
+                <td>8.1%</td>
+            </tr>
+            <tr>
+                <td><a href="UnderscoreTests.html">UnderscoreTests</a></td>
+                <td>com.testngdoc.sample</td>
+                <td>3</td>
+                <td>8.1%</td>
+            </tr>
         </table>
         
-        <#if displayTagsChart && tagPercentages?? && tagPercentages?size gt 0>
         <div class="chart-container">
             <h3 class="chart-title">Test Tags Distribution</h3>
             <canvas id="tagsChart" width="400" height="400"></canvas>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 var ctx = document.getElementById('tagsChart').getContext('2d');
                 var tagsChart = new Chart(ctx, {
                     type: 'pie',
                     data: {
-                        labels: [<#list tagPercentages?keys as tag>'${tag}',</#list>],
+                        labels: ['Capability','UI','API','Feature',],
                         datasets: [{
-                            data: [<#list tagPercentages?values as value>${value},</#list>],
+                            data: [13.5,8.1,5.4,13.5,],
                             backgroundColor: [
                                 '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
                                 '#5a5c69', '#858796', '#6f42c1', '#20c9a6', '#f8f9fc',
@@ -213,7 +249,7 @@
                             legend: {
                                 position: 'right',
                                 labels: {
-                                    color: '<#if darkMode>#e0e0e0<#else>#333333</#if>'
+                                    color: '#e0e0e0'
                                 }
                             }
                         }
@@ -221,7 +257,6 @@
                 });
             });
         </script>
-        </#if>
     </div>
 </body>
 </html>

@@ -1,24 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>${className} - ${reportTitle}</title>
+    <title>TaggedTests - TestNG Documentation - Light Mode</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root {
-            <#if darkMode>
-            --primary-color: #3a5a8c;
-            --secondary-color: #2c4a7c;
-            --accent-color: #4d7ab8;
-            --background-color: #1e1e1e;
-            --card-bg-color: #2d2d2d;
-            --text-color: #e0e0e0;
-            --border-color: #444444;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --error-color: #dc3545;
-            --code-bg-color: #2a2a2a;
-            <#else>
             --primary-color: #4a6da7;
             --secondary-color: #304878;
             --accent-color: #5d8fdb;
@@ -30,7 +17,6 @@
             --warning-color: #ffc107;
             --error-color: #dc3545;
             --code-bg-color: #f6f8fa;
-            </#if>
         }
         * {
             box-sizing: border-box;
@@ -166,10 +152,8 @@
 <body>
     <header>
         <div class="container">
-            <h1>${className}</h1>
-            <#if reportHeader??>
-                <div class="header-note">${reportHeader}</div>
-            </#if>
+            <h1>TaggedTests</h1>
+                <div class="header-note">This is a much longer header text to test how the styling handles longer text in the header section. It should be displayed with proper styling, smaller font size, and italic formatting.</div>
             <div class="nav">
                 <a href="index.html">Back to Index</a>
             </div>
@@ -177,27 +161,87 @@
     </header>
     <div class="container">
         <div class="info-panel">
-            <p><strong>Package:</strong> ${packageName}</p>
-            <p><strong>Number of Test Methods:</strong> ${testMethods?size}</p>
-            <p><strong>Percentage of Total:</strong> ${percentage}%</p>
+            <p><strong>Package:</strong> com.testngdoc.sample</p>
+            <p><strong>Number of Test Methods:</strong> 5</p>
+            <p><strong>Percentage of Total:</strong> 13.5%</p>
         </div>
         
         <h2>Test Methods</h2>
-        <#list testMethods as method>
         <div class="method">
-            <div class="method-name">${method.name}</div>
-            <#if method.tags?? && method.tags?size gt 0>
+            <div class="method-name">testLoginWithValidCredentials</div>
             <div class="tags-container">
-                <#list method.tags as tag>
-                <span class="tag">${tag}</span>
-                </#list>
+                <span class="tag">Feature: Authentication</span>
+                <span class="tag">Capability: Security</span>
+                <span class="tag">UI</span>
             </div>
-            </#if>
             <div class="method-description">
-                <pre>${method.description}</pre>
+                <pre>Test implementation
+This test login with valid credentials.
+
+- Confirms that Login should succeed with valid credentials
+</pre>
             </div>
         </div>
-        </#list>
+        <div class="method">
+            <div class="method-name">testUpdateUserProfile</div>
+            <div class="tags-container">
+                <span class="tag">Feature: User Management</span>
+                <span class="tag">Capability: Data Integrity</span>
+                <span class="tag">UI</span>
+                <span class="tag">API</span>
+            </div>
+            <div class="method-description">
+                <pre>Test implementation
+This test update user profile.
+
+- Confirms that User profile should be updated successfully
+</pre>
+            </div>
+        </div>
+        <div class="method">
+            <div class="method-name">testProcessPayment</div>
+            <div class="tags-container">
+                <span class="tag">Feature: Payment</span>
+                <span class="tag">Capability: Financial</span>
+                <span class="tag">API</span>
+            </div>
+            <div class="method-description">
+                <pre>Test implementation
+This test process payment.
+
+- Confirms that Payment should be processed successfully
+</pre>
+            </div>
+        </div>
+        <div class="method">
+            <div class="method-name">testExportData</div>
+            <div class="tags-container">
+                <span class="tag">Feature: Reporting</span>
+                <span class="tag">Capability: Data Export</span>
+                <span class="tag">UI</span>
+            </div>
+            <div class="method-description">
+                <pre>Test implementation
+This test export data.
+
+- Confirms that Data export should complete successfully
+</pre>
+            </div>
+        </div>
+        <div class="method">
+            <div class="method-name">testSendNotification</div>
+            <div class="tags-container">
+                <span class="tag">Feature: Notifications</span>
+                <span class="tag">Capability: Communication</span>
+            </div>
+            <div class="method-description">
+                <pre>Test implementation
+This test send notification.
+
+- Confirms that Notification should be sent successfully
+</pre>
+            </div>
+        </div>
     </div>
 </body>
 </html>

@@ -17,6 +17,7 @@
             --success-color: #28a745;
             --warning-color: #ffc107;
             --error-color: #dc3545;
+            --code-bg-color: #2a2a2a;
             <#else>
             --primary-color: #4a6da7;
             --secondary-color: #304878;
@@ -28,6 +29,7 @@
             --success-color: #28a745;
             --warning-color: #ffc107;
             --error-color: #dc3545;
+            --code-bg-color: #f6f8fa;
             </#if>
         }
         * {
@@ -53,103 +55,97 @@
             color: white;
             padding: 20px 0;
             margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        header .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         h1 {
-            color: white;
             font-size: 2.2rem;
-            font-weight: 600;
+            margin-bottom: 10px;
+            color: white;
+        }
+        .header-note {
+            font-size: 0.9rem;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
         }
         h2 {
-            color: var(--secondary-color);
             font-size: 1.8rem;
-            margin: 25px 0 15px 0;
+            margin: 25px 0 15px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
             padding-bottom: 10px;
-            border-bottom: 2px solid var(--accent-color);
+        }
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
         }
         .nav {
-            margin-bottom: 20px;
+            margin-top: 10px;
         }
         .nav a {
-            display: inline-block;
-            padding: 8px 16px;
-            background-color: var(--primary-color);
             color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            transition: background-color 0.3s ease;
+            opacity: 0.9;
+            font-size: 0.9rem;
         }
         .nav a:hover {
-            background-color: var(--secondary-color);
+            opacity: 1;
         }
         .info-panel {
             background-color: var(--card-bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
+            border-radius: 8px;
             padding: 20px;
             margin-bottom: 30px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
         }
         .info-panel p {
             margin-bottom: 10px;
         }
-        .info-panel p:last-child {
-            margin-bottom: 0;
-        }
         .method {
             background-color: var(--card-bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
+            border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
         }
         .method-name {
             font-weight: 600;
-            font-size: 1.2rem;
             color: var(--primary-color);
-            margin-bottom: 15px;
-            padding-bottom: 10px;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
             border-bottom: 1px solid var(--border-color);
         }
-        .method-description {
-            color: var(--text-color);
-        }
-        .method-description pre {
-            white-space: pre-wrap;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 1rem;
-            line-height: 1.6;
-            background-color: transparent;
-            padding: 0;
-            margin: 0;
-            border: none;
+        .tags-container {
+            margin: 10px 0;
         }
         .tag {
             display: inline-block;
-            padding: 4px 8px;
-            margin: 2px;
             background-color: var(--accent-color);
             color: white;
+            padding: 3px 8px;
             border-radius: 4px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
         }
-        .tags-container {
-            margin-top: 10px;
-            margin-bottom: 15px;
+        .method-description {
+            margin-top: 15px;
         }
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px 0;
-            color: #666;
+        pre {
+            background-color: var(--code-bg-color);
+            color: var(--text-color);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            line-height: 1.5;
+            font-family: 'Consolas', 'Monaco', monospace;
             font-size: 0.9rem;
-            border-top: 1px solid #e1e4e8;
+            border: 1px solid var(--border-color);
         }
         @media (max-width: 768px) {
             .container {
@@ -171,6 +167,9 @@
     <header>
         <div class="container">
             <h1>${className}</h1>
+            <#if reportHeader??>
+                <div class="header-note">${reportHeader}</div>
+            </#if>
             <div class="nav">
                 <a href="index.html">Back to Index</a>
             </div>

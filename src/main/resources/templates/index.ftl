@@ -53,95 +53,82 @@
             color: white;
             padding: 20px 0;
             margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        header .container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         h1 {
-            color: white;
             font-size: 2.2rem;
-            font-weight: 600;
-            text-align: center;
+            margin-bottom: 10px;
+            color: white;
+        }
+        .header-note {
+            font-size: 0.9rem;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
         }
         h2 {
-            color: var(--secondary-color);
             font-size: 1.8rem;
-            margin: 25px 0 15px 0;
+            margin: 25px 0 15px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
             padding-bottom: 10px;
-            border-bottom: 2px solid var(--accent-color);
+        }
+        h3 {
+            font-size: 1.4rem;
+            margin: 20px 0 10px;
+            color: var(--primary-color);
+        }
+        p {
+            margin-bottom: 15px;
+        }
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
         }
         .summary {
             background-color: var(--card-bg-color);
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 30px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-        .summary p {
-            margin: 10px 0;
-            font-size: 1.1rem;
-        }
-        .summary strong {
-            color: var(--secondary-color);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
         }
         table {
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
+            border-collapse: collapse;
             margin: 20px 0;
+            background-color: var(--card-bg-color);
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
         th {
-            background-color: var(--primary-color);
+            background-color: var(--secondary-color);
             color: white;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
+            text-align: left;
+            padding: 12px 15px;
         }
-        tr:nth-child(even) {
-            background-color: rgba(0, 0, 0, 0.02);
+        td {
+            padding: 10px 15px;
+            border-top: 1px solid var(--border-color);
         }
         tr:hover {
             background-color: rgba(0, 0, 0, 0.05);
         }
-        td:last-child, th:last-child {
-            text-align: center;
-        }
-        a {
-            color: var(--accent-color);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-        a:hover {
-            color: var(--secondary-color);
-            text-decoration: underline;
-        }
         .chart-container {
-            width: 100%;
-            max-width: 600px;
-            margin: 30px auto;
+            margin: 30px 0;
             background-color: var(--card-bg-color);
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
         }
         .chart-title {
             text-align: center;
             margin-bottom: 20px;
-            color: var(--secondary-color);
         }
         @media (max-width: 768px) {
             .container {
@@ -152,6 +139,10 @@
             }
             h2 {
                 font-size: 1.5rem;
+            }
+            table {
+                display: block;
+                overflow-x: auto;
             }
             th, td {
                 padding: 8px 10px;
@@ -167,7 +158,7 @@
         <div class="container">
             <h1>${reportTitle}</h1>
             <#if reportHeader??>
-                <h2 style="color: white; border-bottom: none;">${reportHeader}</h2>
+                <div class="header-note">${reportHeader}</div>
             </#if>
         </div>
     </header>
@@ -199,66 +190,32 @@
         <#if displayTagsChart && tagPercentages?? && tagPercentages?size gt 0>
         <div class="chart-container">
             <h3 class="chart-title">Test Tags Distribution</h3>
-            <canvas id="tagsChart"></canvas>
+            <canvas id="tagsChart" width="400" height="400"></canvas>
         </div>
-        
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const ctx = document.getElementById('tagsChart').getContext('2d');
-                
-                // Extract data from the template
-                const labels = [
-                    <#list tagPercentages?keys as tag>
-                    "${tag}"<#if tag_has_next>,</#if>
-                    </#list>
-                ];
-                
-                const data = [
-                    <#list tagPercentages?keys as tag>
-                    ${tagPercentages[tag]}<#if tag_has_next>,</#if>
-                    </#list>
-                ];
-                
-                // Generate random colors
-                const backgroundColors = labels.map(() => {
-                    const r = Math.floor(Math.random() * 200) + 55;
-                    const g = Math.floor(Math.random() * 200) + 55;
-                    const b = Math.floor(Math.random() * 200) + 55;
-                    return `rgba(${r}, ${g}, ${b}, 0.7)`;
-                });
-                
-                const borderColors = backgroundColors.map(color => {
-                    return color.replace('0.7', '1');
-                });
-                
-                // Create the chart
-                new Chart(ctx, {
+                var ctx = document.getElementById('tagsChart').getContext('2d');
+                var tagsChart = new Chart(ctx, {
                     type: 'pie',
                     data: {
-                        labels: labels,
+                        labels: [<#list tagPercentages?keys as tag>'${tag}',</#list>],
                         datasets: [{
-                            data: data,
-                            backgroundColor: backgroundColors,
-                            borderColor: borderColors,
-                            borderWidth: 1
+                            data: [<#list tagPercentages?values as value>${value},</#list>],
+                            backgroundColor: [
+                                '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+                                '#5a5c69', '#858796', '#6f42c1', '#20c9a6', '#f8f9fc',
+                                '#3a5a8c', '#2c4a7c', '#4d7ab8', '#28a745', '#ffc107'
+                            ]
                         }]
                     },
                     options: {
                         responsive: true,
+                        maintainAspectRatio: false,
                         plugins: {
                             legend: {
                                 position: 'right',
                                 labels: {
                                     color: '<#if darkMode>#e0e0e0<#else>#333333</#if>'
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        const label = context.label || '';
-                                        const value = context.raw || 0;
-                                        return `${label}: ${value}%`;
-                                    }
                                 }
                             }
                         }

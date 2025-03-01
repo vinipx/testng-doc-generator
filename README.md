@@ -15,6 +15,7 @@ A Java tool that generates comprehensive documentation for TestNG test classes. 
 - Gherkin-style formatting for BDD-style test method names
 - Tag-based categorization and visualization
 - Custom styling options including dark mode support
+- Flexible output directory configuration
 
 ## 🚀 Features
 
@@ -32,6 +33,7 @@ A Java tool that generates comprehensive documentation for TestNG test classes. 
 - **Customizable report title and header**
 - **Multi-source directory scanning for projects with complex structures**
 - **Package specification feature for scanning specific packages**
+- **Flexible output directory configuration**
 
 ## 📷 Screenshots
 
@@ -99,7 +101,7 @@ Add the JitPack repository to your build file:
     <dependency>
         <groupId>com.github.vinipx</groupId>
         <artifactId>testng-doc-generator</artifactId>
-        <version>v1.2.1</version>
+        <version>v1.2.4</version>
     </dependency>
 </dependencies>
 ```
@@ -111,7 +113,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.vinipx:testng-doc-generator:v1.2.1'
+    implementation 'com.github.vinipx:testng-doc-generator:v1.2.4'
 }
 ```
 
@@ -124,14 +126,14 @@ The TestNG Documentation Generator is also available from Maven Central:
 <dependency>
     <groupId>io.vinipx</groupId>
     <artifactId>testng-doc-generator</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.4</version>
 </dependency>
 ```
 
 **Gradle:**
 ```groovy
 dependencies {
-    implementation 'io.vinipx:testng-doc-generator:1.2.1'
+    implementation 'io.vinipx:testng-doc-generator:1.2.4'
 }
 ```
 
@@ -144,14 +146,14 @@ If you've built the project locally, you can use it from your local Maven reposi
 <dependency>
     <groupId>io.vinipx</groupId>
     <artifactId>testng-doc-generator</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.4</version>
 </dependency>
 ```
 
 **Gradle:**
 ```groovy
 dependencies {
-    implementation 'io.vinipx:testng-doc-generator:1.2.1'
+    implementation 'io.vinipx:testng-doc-generator:1.2.4'
 }
 ```
 
@@ -168,6 +170,9 @@ public class DocumentationGenerator {
     public static void main(String[] args) {
         // Create a new generator instance
         TestNGDocGenerator generator = new TestNGDocGenerator();
+        
+        // Optional: Set custom output directory
+        generator.setOutputDirectory("custom-docs");
         
         // Optional: Enable dark mode
         generator.useDarkMode();
@@ -210,7 +215,16 @@ public class DocumentationGenerator {
 ## 🔍 Usage
 
 ### Basic Usage
-{{ ... }}
+
+```bash
+java -jar testng-doc-generator.jar <source-directory> [--output <output-directory>]
+```
+
+You can also specify a custom output directory using the `--output` parameter:
+
+```bash
+java -jar testng-doc-generator.jar src/test/java --output custom-docs
+```
 
 ### Multi-Source Directory Scanning
 
@@ -290,6 +304,79 @@ This feature is particularly useful for:
 - Situations where you want to document only a specific package
 - Microservice architectures where test packages are distributed across multiple modules
 
+### Custom Output Directory
+
+Set a custom output directory for the generated documentation:
+
+```java
+TestNGDocGenerator generator = new TestNGDocGenerator();
+generator.setOutputDirectory("custom-docs");
+```
+
+This allows you to:
+- Generate documentation in a specific location
+- Create multiple documentation sets with different configurations
+- Integrate with custom build processes
+- Avoid overwriting existing documentation
+
+Using the command-line interface:
+
+```bash
+java -jar testng-doc-generator.jar src/test/java --output custom-docs
+```
+
+## ⚙️ Advanced Configuration Options
+
+### Output Directory
+
+Set a custom output directory for the generated documentation:
+
+```java
+TestNGDocGenerator generator = new TestNGDocGenerator();
+generator.setOutputDirectory("custom-docs");
+```
+
+### Dark Mode
+
+Enable dark mode for better readability in low-light environments:
+
+```java
+TestNGDocGenerator generator = new TestNGDocGenerator();
+generator.useDarkMode();
+// or
+generator.useDarkMode(true); // Enable
+generator.useDarkMode(false); // Disable
+```
+
+### Tag Statistics Chart
+
+Display a pie chart showing the distribution of tags across your test suite:
+
+```java
+TestNGDocGenerator generator = new TestNGDocGenerator();
+generator.displayTagsChart();
+// or
+generator.displayTagsChart(true); // Enable
+generator.displayTagsChart(false); // Disable
+```
+
+### Custom Report Title and Header
+
+Customize the title and header of your documentation:
+
+```java
+TestNGDocGenerator generator = new TestNGDocGenerator();
+generator.setReportTitle("Project X Test Documentation");
+generator.setReportHeader("Generated: March 1, 2025");
+```
+
+## 📊 Output
+
+By default, the tool generates HTML documentation in a `testng-docs` directory. You can customize this using the `setOutputDirectory()` method or the `--output` command-line parameter:
+
+- `index.html`: Summary page with links to all test classes
+- `<ClassName>.html`: Detailed documentation for each test class
+
 ## 🏗️ Building the Project
 
 ```bash
@@ -315,7 +402,7 @@ To publish the library to your local Maven repository for testing:
 Or run the JAR directly:
 
 ```bash
-java -jar build/libs/testng-doc-generator-1.2.1-all.jar <source-directory>
+java -jar build/libs/testng-doc-generator-1.2.4-all.jar <source-directory>
 ```
 
 Replace `<source-directory>` with the directory containing your TestNG test classes.
@@ -379,42 +466,6 @@ public void testLoginPage() {
 ```
 
 These tags will be displayed in the documentation and used for statistics visualization. Tags help categorize tests by feature, type, priority, etc.
-
-## ⚙️ Advanced Configuration Options
-
-### Dark Mode
-
-Enable dark mode for better readability in low-light environments:
-
-```java
-TestNGDocGenerator generator = new TestNGDocGenerator();
-generator.useDarkMode();
-// or
-generator.useDarkMode(true); // Enable
-generator.useDarkMode(false); // Disable
-```
-
-### Tag Statistics Chart
-
-Display a pie chart showing the distribution of tags across your test suite:
-
-```java
-TestNGDocGenerator generator = new TestNGDocGenerator();
-generator.displayTagsChart();
-// or
-generator.displayTagsChart(true); // Enable
-generator.displayTagsChart(false); // Disable
-```
-
-### Custom Report Title and Header
-
-Customize the title and header of your documentation:
-
-```java
-TestNGDocGenerator generator = new TestNGDocGenerator();
-generator.setReportTitle("Project X Test Documentation");
-generator.setReportHeader("Generated: March 1, 2025");
-```
 
 ## 👥 Contributing
 

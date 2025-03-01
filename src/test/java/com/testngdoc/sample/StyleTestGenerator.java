@@ -69,22 +69,12 @@ public class StyleTestGenerator {
             String header) throws IOException, TemplateException {
         
         // Create TestNGDocGenerator with specified settings
-        TestNGDocGenerator generator = new TestNGDocGenerator();
-        
-        // Set output directory by reflection (since it's a private static field)
-        try {
-            java.lang.reflect.Field outputDirField = TestNGDocGenerator.class.getDeclaredField("OUTPUT_DIR");
-            outputDirField.setAccessible(true);
-            outputDirField.set(null, outputDir);
-        } catch (Exception e) {
-            System.err.println("Could not set output directory: " + e.getMessage());
-        }
-        
-        // Configure generator
-        generator.useDarkMode(darkMode)
-                .displayTagsChart()
-                .setReportTitle(title)
-                .setReportHeader(header);
+        TestNGDocGenerator generator = new TestNGDocGenerator()
+            .setOutputDirectory(outputDir)
+            .useDarkMode(darkMode)
+            .displayTagsChart()
+            .setReportTitle(title)
+            .setReportHeader(header);
         
         // Generate documentation
         System.out.println("Generating documentation with settings:");

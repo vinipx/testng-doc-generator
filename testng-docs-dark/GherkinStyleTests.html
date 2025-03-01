@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>${className} - ${reportTitle}</title>
+    <title>GherkinStyleTests - TestNG Documentation - Dark Mode</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root {
-            <#if darkMode>
             --primary-color: #3a5a8c;
             --secondary-color: #2c4a7c;
             --accent-color: #4d7ab8;
@@ -18,19 +17,6 @@
             --warning-color: #ffc107;
             --error-color: #dc3545;
             --code-bg-color: #2a2a2a;
-            <#else>
-            --primary-color: #4a6da7;
-            --secondary-color: #304878;
-            --accent-color: #5d8fdb;
-            --background-color: #f8f9fa;
-            --card-bg-color: #ffffff;
-            --text-color: #333333;
-            --border-color: #e1e4e8;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --error-color: #dc3545;
-            --code-bg-color: #f6f8fa;
-            </#if>
         }
         * {
             box-sizing: border-box;
@@ -166,10 +152,8 @@
 <body>
     <header>
         <div class="container">
-            <h1>${className}</h1>
-            <#if reportHeader??>
-                <div class="header-note">${reportHeader}</div>
-            </#if>
+            <h1>GherkinStyleTests</h1>
+                <div class="header-note">Standard header in dark mode</div>
             <div class="nav">
                 <a href="index.html">Back to Index</a>
             </div>
@@ -177,27 +161,65 @@
     </header>
     <div class="container">
         <div class="info-panel">
-            <p><strong>Package:</strong> ${packageName}</p>
-            <p><strong>Number of Test Methods:</strong> ${testMethods?size}</p>
-            <p><strong>Percentage of Total:</strong> ${percentage}%</p>
+            <p><strong>Package:</strong> com.testngdoc.sample</p>
+            <p><strong>Number of Test Methods:</strong> 4</p>
+            <p><strong>Percentage of Total:</strong> 10.8%</p>
         </div>
         
         <h2>Test Methods</h2>
-        <#list testMethods as method>
         <div class="method">
-            <div class="method-name">${method.name}</div>
-            <#if method.tags?? && method.tags?size gt 0>
-            <div class="tags-container">
-                <#list method.tags as tag>
-                <span class="tag">${tag}</span>
-                </#list>
-            </div>
-            </#if>
+            <div class="method-name">givenValidCredentials_whenUserLogsIn_thenLoginSucceedsTest</div>
             <div class="method-description">
-                <pre>${method.description}</pre>
+                <pre>Method: givenValidCredentials_whenUserLogsIn_thenLoginSucceedsTest
+
+Given  valid credentials 
+When  user logs in 
+Then  login succeeds
+
+- Confirms that Login should be successful with valid credentials
+</pre>
             </div>
         </div>
-        </#list>
+        <div class="method">
+            <div class="method-name">givenInvalidPassword_whenUserLogsIn_thenLoginFailsTest</div>
+            <div class="method-description">
+                <pre>Method: givenInvalidPassword_whenUserLogsIn_thenLoginFailsTest
+
+Given  invalid password 
+When  user logs in 
+Then  login fails
+
+- Ensures that Login should fail with invalid password
+</pre>
+            </div>
+        </div>
+        <div class="method">
+            <div class="method-name">givenUserProfile_whenUpdatingEmail_thenProfileIsUpdatedTest</div>
+            <div class="method-description">
+                <pre>Method: givenUserProfile_whenUpdatingEmail_thenProfileIsUpdatedTest
+
+Given  user profile 
+When  updating email 
+Then  profile is updated
+
+- Confirms that Profile update should be successful
+- Verifies that email
+</pre>
+            </div>
+        </div>
+        <div class="method">
+            <div class="method-name">givenWifiOn_whenDeviceIsReboot_thenAvsLogsArePresentTest</div>
+            <div class="method-description">
+                <pre>Method: givenWifiOn_whenDeviceIsReboot_thenAvsLogsArePresentTest
+
+Given  wifi on 
+When  device is reboot 
+Then  avs logs are present
+
+- Confirms that AVS logs should be present after reboot with WiFi on
+</pre>
+            </div>
+        </div>
     </div>
 </body>
 </html>

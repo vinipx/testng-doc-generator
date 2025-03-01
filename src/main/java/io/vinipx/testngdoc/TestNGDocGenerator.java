@@ -272,7 +272,24 @@ public class TestNGDocGenerator {
     private Configuration initializeFreemarker() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_32);
         
-        // First try to use templates from the file system
+        // First try to use templates from the classpath resources (highest priority)
+        try {
+            // Check if templates exist in classpath resources
+            InputStream classTemplateStream = getClass().getClassLoader().getResourceAsStream("templates/class.ftl");
+            InputStream indexTemplateStream = getClass().getClassLoader().getResourceAsStream("templates/index.ftl");
+            
+            if (classTemplateStream != null && indexTemplateStream != null) {
+                // Templates exist in classpath, use them
+                classTemplateStream.close();
+                indexTemplateStream.close();
+                cfg.setClassLoaderForTemplateLoading(getClass().getClassLoader(), "templates");
+                return cfg;
+            }
+        } catch (Exception e) {
+            System.out.println("Could not load templates from classpath: " + e.getMessage());
+        }
+        
+        // If not found in classpath, try to use templates from the file system
         Path templatePath = Paths.get(TEMPLATE_DIR);
         if (!Files.exists(templatePath)) {
             try {
@@ -280,9 +297,8 @@ public class TestNGDocGenerator {
                 createDefaultTemplates(templatePath);
                 cfg.setDirectoryForTemplateLoading(new File(TEMPLATE_DIR));
             } catch (IOException e) {
-                System.out.println("Could not create template directory, using classpath resources instead");
-                // If we can't create the template directory (e.g., when used as a dependency),
-                // use classpath resources instead
+                System.out.println("Could not create template directory: " + e.getMessage());
+                // Last resort: use classpath resources with default templates
                 cfg.setClassLoaderForTemplateLoading(getClass().getClassLoader(), "templates");
             }
         } else {
@@ -1329,6 +1345,17 @@ public class TestNGDocGenerator {
      */
     public TestNGDocGenerator setReportHeader(String header) {
         this.reportHeader = header;
+        return this;
+    }
+
+    /**
+     * Set the output directory for the generated documentation
+     * 
+     * @param outputDir The directory where documentation will be generated
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator setOutputDirectory(String outputDir) {
+        OUTPUT_DIR = outputDir;
         return this;
     }
 
