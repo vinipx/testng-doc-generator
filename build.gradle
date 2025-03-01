@@ -185,15 +185,14 @@ jar {
         )
     }
     
-    // Include the templates directory in the JAR
-    from('templates') {
-        into 'templates'
+    // Include templates from resources directory only
+    // This ensures templates are properly included in the JAR
+    from('src/main/resources') {
+        include 'templates/**'
     }
     
-    // Ensure src/main/resources/templates are also included
-    from('src/main/resources/templates') {
-        into 'templates'
-    }
+    // Avoid duplicate template files
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 // Maven publication configuration for JitPack and Maven Central
