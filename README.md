@@ -76,18 +76,15 @@ Here are some screenshots of the generated documentation:
 - Java 11 or higher
 - Gradle 7.0 or higher (or use the included Gradle wrapper)
 
-## 🔧 Using as a Library
+## 📦 Installation
 
-This project can be used as a library dependency in your test automation framework. For detailed integration instructions, see [INTEGRATION.md](INTEGRATION.md).
+The TestNG Documentation Generator can be included in your project in several ways:
 
-### Adding the Dependency
-
-#### Using JitPack (Recommended)
+### From JitPack
 
 Add the JitPack repository to your build file:
 
-##### Maven
-
+**Maven:**
 ```xml
 <repositories>
     <repository>
@@ -105,11 +102,9 @@ Add the JitPack repository to your build file:
 </dependencies>
 ```
 
-##### Gradle
-
+**Gradle:**
 ```groovy
 repositories {
-    mavenCentral()
     maven { url 'https://jitpack.io' }
 }
 
@@ -118,12 +113,11 @@ dependencies {
 }
 ```
 
-#### From Local Maven Repository
+### From Maven Central
 
-If you've built the project locally, you can use it from your local Maven repository:
+The TestNG Documentation Generator is also available from Maven Central:
 
-##### Maven
-
+**Maven:**
 ```xml
 <dependency>
     <groupId>io.vinipx</groupId>
@@ -132,13 +126,36 @@ If you've built the project locally, you can use it from your local Maven reposi
 </dependency>
 ```
 
-##### Gradle
-
+**Gradle:**
 ```groovy
 dependencies {
     implementation 'io.vinipx:testng-doc-generator:1.1.0'
 }
 ```
+
+### Local Installation
+
+If you've built the project locally, you can use it from your local Maven repository:
+
+**Maven:**
+```xml
+<dependency>
+    <groupId>io.vinipx</groupId>
+    <artifactId>testng-doc-generator</artifactId>
+    <version>1.1.0</version>
+</dependency>
+```
+
+**Gradle:**
+```groovy
+dependencies {
+    implementation 'io.vinipx:testng-doc-generator:1.1.0'
+}
+```
+
+## 🔧 Using as a Library
+
+This project can be used as a library dependency in your test automation framework. For detailed integration instructions, see [INTEGRATION.md](INTEGRATION.md).
 
 ### Basic Usage
 
