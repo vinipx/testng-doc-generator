@@ -155,50 +155,54 @@ public class SimpleTestNGDocGenerator {
             "        }\n" +
             "        .info-panel {\n" +
             "            background-color: var(--card-bg-color);\n" +
-            "            border-radius: 8px;\n" +
+            "            border: 1px solid var(--border-color);\n" +
+            "            border-radius: 5px;\n" +
             "            padding: 20px;\n" +
             "            margin-bottom: 30px;\n" +
             "            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);\n" +
             "        }\n" +
             "        .info-panel p {\n" +
-            "            margin: 10px 0;\n" +
-            "            font-size: 1.1rem;\n" +
+            "            margin-bottom: 10px;\n" +
             "        }\n" +
-            "        .info-panel strong {\n" +
-            "            color: var(--secondary-color);\n" +
+            "        .info-panel p:last-child {\n" +
+            "            margin-bottom: 0;\n" +
             "        }\n" +
             "        .method {\n" +
             "            background-color: var(--card-bg-color);\n" +
-            "            border-radius: 8px;\n" +
+            "            border: 1px solid var(--border-color);\n" +
+            "            border-radius: 5px;\n" +
             "            padding: 20px;\n" +
             "            margin-bottom: 20px;\n" +
             "            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);\n" +
-            "            transition: transform 0.2s ease, box-shadow 0.2s ease;\n" +
-            "        }\n" +
-            "        .method:hover {\n" +
-            "            transform: translateY(-3px);\n" +
-            "            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\n" +
             "        }\n" +
             "        .method-name {\n" +
             "            font-weight: 600;\n" +
+            "            font-size: 1.2rem;\n" +
             "            color: var(--primary-color);\n" +
-            "            font-size: 1.3rem;\n" +
-            "            margin-bottom: 10px;\n" +
-            "            padding-bottom: 8px;\n" +
+            "            margin-bottom: 15px;\n" +
+            "            padding-bottom: 10px;\n" +
             "            border-bottom: 1px solid var(--border-color);\n" +
             "        }\n" +
             "        .method-description {\n" +
-            "            margin-top: 15px;\n" +
+            "            color: var(--text-color);\n" +
             "        }\n" +
-            "        pre {\n" +
-            "            background-color: #f6f8fa;\n" +
-            "            padding: 15px;\n" +
-            "            border-radius: 6px;\n" +
-            "            overflow-x: auto;\n" +
-            "            line-height: 1.5;\n" +
-            "            font-family: 'Consolas', 'Monaco', monospace;\n" +
+            "        .method-description pre {\n" +
+            "            white-space: pre-wrap;\n" +
+            "            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;\n" +
+            "            font-size: 1rem;\n" +
+            "            line-height: 1.6;\n" +
+            "            background-color: transparent;\n" +
+            "            padding: 0;\n" +
+            "            margin: 0;\n" +
+            "            border: none;\n" +
+            "        }\n" +
+            "        footer {\n" +
+            "            text-align: center;\n" +
+            "            margin-top: 40px;\n" +
+            "            padding: 20px 0;\n" +
+            "            color: #666;\n" +
             "            font-size: 0.9rem;\n" +
-            "            border: 1px solid #e1e4e8;\n" +
+            "            border-top: 1px solid #e1e4e8;\n" +
             "        }\n" +
             "        @media (max-width: 768px) {\n" +
             "            .container {\n" +
@@ -518,6 +522,19 @@ public class SimpleTestNGDocGenerator {
             template.process(dataModel, out);
         }
     }
+    
+    /**
+     * Generates a human-readable explanation of the test method logic.
+     * This method is public for testing purposes.
+     * 
+     * @param rawCode The raw code of the test method
+     * @param methodName The name of the test method
+     * @return A human-readable explanation of the test method logic
+     */
+    public String generateHumanReadableExplanation(String rawCode, String methodName) {
+        TestMethodVisitor visitor = new TestMethodVisitor();
+        return visitor.generateHumanReadableExplanation(rawCode, methodName);
+    }
 
     // Visitor to find TestNG test methods
     private static class TestMethodVisitor extends VoidVisitorAdapter<Void> {
@@ -551,7 +568,7 @@ public class SimpleTestNGDocGenerator {
          * @param methodName The name of the test method
          * @return A human-readable explanation of the test method logic
          */
-        private String generateHumanReadableExplanation(String rawCode, String methodName) {
+        String generateHumanReadableExplanation(String rawCode, String methodName) {
             // Remove braces and trim
             String cleanCode = rawCode.replaceAll("^\\{\\s*", "").replaceAll("\\s*\\}$", "").trim();
             
@@ -573,20 +590,13 @@ public class SimpleTestNGDocGenerator {
             if (explanation.length() == 0 || true) {
                 // Check for test case ID pattern (e.g., TC01_, TC02_, etc.)
                 String testCaseId = null;
+                String originalMethodName = methodName; // Store the original method name
                 java.util.regex.Pattern tcPattern = java.util.regex.Pattern.compile("^(TC\\d+)_(.*)$");
                 java.util.regex.Matcher matcher = tcPattern.matcher(methodName);
                 
                 if (matcher.find()) {
                     testCaseId = matcher.group(1);
                     methodName = matcher.group(2); // Use the rest of the method name without the TC prefix
-                }
-                
-                // Add a general description based on the method name
-                explanation.append("This test ");
-                
-                // If a test case ID was found, include it
-                if (testCaseId != null) {
-                    explanation.append("(").append(testCaseId).append(") ");
                 }
                 
                 // Convert camelCase method name to readable format
@@ -600,14 +610,26 @@ public class SimpleTestNGDocGenerator {
                         .replaceAll("when", "\nWhen ")
                         .replaceAll("then", "\nThen ")
                         .replaceAll("test", "")
+                        .replaceAll("_", " ") // Replace underscores with spaces
                         .trim();
                     
                     explanation = new StringBuilder();
+                    explanation.append("Method: ").append(originalMethodName).append("\n\n");
                     if (testCaseId != null) {
                         explanation.append(testCaseId).append("\n");
                     }
                     explanation.append(readableMethodName).append("\n\n");
                 } else {
+                    // Add a general description based on the method name
+                    explanation.append("This test ");
+                    
+                    // If a test case ID was found, include it
+                    if (testCaseId != null) {
+                        explanation.append("(").append(testCaseId).append(") ");
+                    }
+                    
+                    // For non-Gherkin style, also replace underscores with spaces
+                    readableMethodName = readableMethodName.replaceAll("_", " ");
                     explanation.append(readableMethodName).append(".\n\n");
                 }
                 

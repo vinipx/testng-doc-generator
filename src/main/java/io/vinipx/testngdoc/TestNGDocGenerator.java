@@ -3,10 +3,15 @@ package io.vinipx.testngdoc;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.ArrayInitializerExpr;
+import com.github.javaparser.ast.expr.MemberValuePair;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import io.vinipx.testngdoc.annotations.Docs;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -14,7 +19,12 @@ import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.testng.annotations.Test;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Files;
@@ -25,8 +35,14 @@ import java.util.stream.Collectors;
 
 public class TestNGDocGenerator {
 
-    private static final String OUTPUT_DIR = "testng-docs";
+    private static String OUTPUT_DIR = "testng-docs";
     private static final String TEMPLATE_DIR = "templates";
+    // Map for custom pattern replacements
+    private Map<String, String> patternReplacements = new HashMap<>();
+    private boolean displayTagsChart = false;
+    private boolean darkMode = false;
+    private String reportTitle = "TestNG Documentation";
+    private String reportHeader = null;
 
     public static void main(String[] args) {
         if (args.length < 1) {
@@ -44,16 +60,18 @@ public class TestNGDocGenerator {
         }
     }
 
+    /**
+     * Generate documentation for all TestNG classes in the specified package
+     * 
+     * @param packageToScan Package to scan for TestNG classes
+     * @throws IOException If an I/O error occurs
+     * @throws TemplateException If a template error occurs
+     */
     public void generateDocumentation(String packageToScan) throws IOException, TemplateException {
-        System.out.println("Scanning package: " + packageToScan);
+        // Create output directory if it doesn't exist
+        createOutputDirectory();
         
-        // Create output directory
-        Path outputPath = Paths.get(OUTPUT_DIR);
-        if (!Files.exists(outputPath)) {
-            Files.createDirectories(outputPath);
-        }
-        
-        // Initialize Freemarker
+        // Initialize FreeMarker
         Configuration cfg = initializeFreemarker();
         
         // Scan for TestNG classes
@@ -63,7 +81,97 @@ public class TestNGDocGenerator {
         generateClassDocumentation(testClasses, cfg);
         generateIndexPage(testClasses, cfg);
         
-        System.out.println("Documentation generated successfully in directory: " + outputPath.toAbsolutePath());
+        System.out.println("Documentation generated in: " + OUTPUT_DIR);
+    }
+    
+    /**
+     * Generate documentation for a specific test class with a custom output directory
+     * @param testClasses Array of test classes to document
+     * @param outputDir Custom output directory
+     */
+    public void generateDocumentation(Class<?>[] testClasses, String outputDir) {
+        try {
+            // Set output directory
+            OUTPUT_DIR = outputDir;
+            
+            // Create output directory if it doesn't exist
+            createOutputDirectory();
+            
+            // Initialize FreeMarker
+            Configuration cfg = initializeFreemarker();
+            
+            List<TestClassInfo> classInfos = new ArrayList<>();
+            
+            for (Class<?> testClass : testClasses) {
+                // Create test class info
+                List<TestMethodInfo> testMethods = new ArrayList<>();
+                
+                // Check each method for @Test annotation
+                for (Method method : testClass.getDeclaredMethods()) {
+                    if (method.isAnnotationPresent(Test.class)) {
+                        String methodDescription = extractMethodLogic(testClass, method.getName());
+                        TestMethodInfo methodInfo = new TestMethodInfo(method.getName(), methodDescription);
+                        extractTagsFromMethod(method, methodInfo);
+                        testMethods.add(methodInfo);
+                    }
+                }
+                
+                if (testMethods.isEmpty()) {
+                    System.out.println("No test methods found in class: " + testClass.getName());
+                    continue;
+                }
+                
+                TestClassInfo classInfo = new TestClassInfo(
+                        testClass.getSimpleName(),
+                        testClass.getPackage().getName(),
+                        testMethods
+                );
+                classInfo.setPercentage("100.0");
+                
+                classInfos.add(classInfo);
+            }
+            
+            // Generate documentation
+            generateClassDocumentation(classInfos, cfg);
+            generateIndexPage(classInfos, cfg);
+            
+            System.out.println("Documentation generated in: " + OUTPUT_DIR);
+            
+        } catch (Exception e) {
+            System.err.println("Error generating documentation: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Generate documentation for all TestNG classes in the specified source directory
+     * 
+     * @param sourceDirectory Directory containing Java source files
+     * @throws IOException If an I/O error occurs
+     * @throws TemplateException If a template error occurs
+     */
+    public void generateDocumentationFromSource(String sourceDirectory) throws IOException, TemplateException {
+        // Create output directory if it doesn't exist
+        createOutputDirectory();
+        
+        // Initialize FreeMarker
+        Configuration cfg = initializeFreemarker();
+        
+        // Scan for TestNG classes
+        List<TestClassInfo> testClasses = scanForTestClassesFromSource(sourceDirectory);
+        
+        // Generate documentation
+        generateClassDocumentation(testClasses, cfg);
+        generateIndexPage(testClasses, cfg);
+        
+        System.out.println("Documentation generated in: " + OUTPUT_DIR);
+    }
+
+    private void createOutputDirectory() throws IOException {
+        Path outputPath = Paths.get(OUTPUT_DIR);
+        if (!Files.exists(outputPath)) {
+            Files.createDirectories(outputPath);
+        }
     }
 
     private Configuration initializeFreemarker() throws IOException {
@@ -87,7 +195,7 @@ public class TestNGDocGenerator {
             "<!DOCTYPE html>\n" +
             "<html>\n" +
             "<head>\n" +
-            "    <title>${className} - TestNG Documentation</title>\n" +
+            "    <title>${className} - ${reportTitle}</title>\n" +
             "    <meta charset=\"UTF-8\">\n" +
             "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
             "    <style>\n" +
@@ -226,7 +334,10 @@ public class TestNGDocGenerator {
             "<body>\n" +
             "    <header>\n" +
             "        <div class=\"container\">\n" +
-            "            <h1>${className}</h1>\n" +
+            "            <h1>${reportTitle}</h1>\n" +
+            "            <#if reportHeader??>\n" +
+            "                <h2>${reportHeader}</h2>\n" +
+            "            </#if>\n" +
             "            <div class=\"nav\">\n" +
             "                <a href=\"index.html\">Back to Index</a>\n" +
             "            </div>\n" +
@@ -259,7 +370,7 @@ public class TestNGDocGenerator {
             "<!DOCTYPE html>\n" +
             "<html>\n" +
             "<head>\n" +
-            "    <title>TestNG Documentation</title>\n" +
+            "    <title>${reportTitle}</title>\n" +
             "    <meta charset=\"UTF-8\">\n" +
             "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
             "    <style>\n" +
@@ -391,7 +502,10 @@ public class TestNGDocGenerator {
             "<body>\n" +
             "    <header>\n" +
             "        <div class=\"container\">\n" +
-            "            <h1>TestNG Documentation</h1>\n" +
+            "            <h1>${reportTitle}</h1>\n" +
+            "            <#if reportHeader??>\n" +
+            "                <h2>${reportHeader}</h2>\n" +
+            "            </#if>\n" +
             "        </div>\n" +
             "    </header>\n" +
             "    <div class=\"container\">\n" +
@@ -465,27 +579,31 @@ public class TestNGDocGenerator {
                 for (Method method : clazz.getDeclaredMethods()) {
                     if (method.isAnnotationPresent(Test.class)) {
                         String methodDescription = extractMethodLogic(clazz, method.getName());
-                        testMethods.add(new TestMethodInfo(method.getName(), methodDescription));
+                        TestMethodInfo methodInfo = new TestMethodInfo(method.getName(), methodDescription);
+                        extractTagsFromMethod(method, methodInfo);
+                        testMethods.add(methodInfo);
                     }
                 }
                 
                 if (!testMethods.isEmpty()) {
-                    testClasses.add(new TestClassInfo(
+                    TestClassInfo classInfo = new TestClassInfo(
                             clazz.getSimpleName(),
                             clazz.getPackage().getName(),
                             testMethods
-                    ));
+                    );
+                    testClasses.add(classInfo);
                     totalTestMethods += testMethods.size();
                 }
             }
             
             // Calculate percentages
             if (totalTestMethods > 0) {
-                for (TestClassInfo testClass : testClasses) {
-                    double percentage = (double) testClass.getTestMethods().size() / totalTestMethods * 100;
-                    testClass.setPercentage(String.format("%.2f", percentage));
+                for (TestClassInfo classInfo : testClasses) {
+                    double percentage = (double) classInfo.getTestMethods().size() / totalTestMethods * 100;
+                    classInfo.setPercentage(String.format("%.1f", percentage));
                 }
             }
+            
         } catch (Exception e) {
             System.err.println("Error scanning for test classes: " + e.getMessage());
             e.printStackTrace();
@@ -495,53 +613,94 @@ public class TestNGDocGenerator {
     }
     
     /**
-     * Scans all classes accessible from the context class loader which belong to the given package.
+     * Scan for TestNG test classes in the specified source directory
+     * 
+     * @param sourceDirectory Directory containing Java source files
+     * @return List of TestClassInfo objects
      */
-    private Class<?>[] getClasses(String packageName) throws Exception {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        String path = packageName.replace('.', '/');
-        java.util.Enumeration<java.net.URL> resources = classLoader.getResources(path);
-        List<File> dirs = new ArrayList<>();
+    private List<TestClassInfo> scanForTestClassesFromSource(String sourceDirectory) {
+        System.out.println("Scanning for TestNG classes in directory: " + sourceDirectory);
         
-        while (resources.hasMoreElements()) {
-            java.net.URL resource = resources.nextElement();
-            dirs.add(new File(resource.getFile()));
-        }
+        List<TestClassInfo> testClasses = new ArrayList<>();
+        int totalTestMethods = 0;
         
-        ArrayList<Class<?>> classes = new ArrayList<>();
-        for (File directory : dirs) {
-            classes.addAll(findClasses(directory, packageName));
-        }
-        
-        return classes.toArray(new Class[0]);
-    }
-    
-    /**
-     * Recursive method used to find all classes in a given directory and subdirs.
-     */
-    private List<Class<?>> findClasses(File directory, String packageName) throws ClassNotFoundException {
-        List<Class<?>> classes = new ArrayList<>();
-        if (!directory.exists()) {
-            return classes;
-        }
-        
-        File[] files = directory.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    classes.addAll(findClasses(file, packageName + "." + file.getName()));
-                } else if (file.getName().endsWith(".class")) {
-                    String className = packageName + '.' + file.getName().substring(0, file.getName().length() - 6);
-                    try {
-                        classes.add(Class.forName(className));
-                    } catch (NoClassDefFoundError e) {
-                        // Skip classes that can't be loaded
-                        System.out.println("Warning: Could not load class " + className + ": " + e.getMessage());
+        try {
+            // Find all Java files in the source directory
+            List<Path> javaFiles = Files.walk(Paths.get(sourceDirectory))
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".java"))
+                    .collect(Collectors.toList());
+            
+            System.out.println("Found " + javaFiles.size() + " Java files");
+            
+            for (Path javaFile : javaFiles) {
+                try {
+                    // Parse the Java file
+                    JavaParser javaParser = new JavaParser();
+                    CompilationUnit cu = javaParser.parse(javaFile).getResult().orElse(null);
+                    
+                    if (cu == null) {
+                        System.out.println("Could not parse file: " + javaFile);
+                        continue;
                     }
+                    
+                    // Extract package name
+                    String packageName = cu.getPackageDeclaration()
+                            .map(pd -> pd.getName().asString())
+                            .orElse("default");
+                    
+                    // Extract class name from file name
+                    String fileName = javaFile.getFileName().toString();
+                    String className = fileName.substring(0, fileName.length() - 5); // Remove .java
+                    
+                    // Check if this file contains TestNG test methods
+                    List<TestMethodInfo> testMethods = new ArrayList<>();
+                    
+                    // Visit all method declarations
+                    cu.accept(new TestMethodVisitor(packageName, className, testMethods), null);
+                    
+                    if (!testMethods.isEmpty()) {
+                        TestClassInfo classInfo = new TestClassInfo(
+                                className,
+                                packageName,
+                                testMethods
+                        );
+                        testClasses.add(classInfo);
+                        totalTestMethods += testMethods.size();
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error processing file " + javaFile + ": " + e.getMessage());
                 }
             }
+            
+            // Calculate percentages
+            if (totalTestMethods > 0) {
+                for (TestClassInfo classInfo : testClasses) {
+                    double percentage = (double) classInfo.getTestMethods().size() / totalTestMethods * 100;
+                    classInfo.setPercentage(String.format("%.1f", percentage));
+                }
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error scanning for test classes: " + e.getMessage());
+            e.printStackTrace();
         }
-        return classes;
+        
+        return testClasses;
+    }
+
+    /**
+     * Get all classes in a package
+     * @param packageName The package name to scan
+     * @return An array of classes in the package
+     */
+    private Class<?>[] getClasses(String packageName) {
+        Reflections reflections = new Reflections(new ConfigurationBuilder()
+                .setUrls(ClasspathHelper.forPackage(packageName))
+                .setScanners(new SubTypesScanner(false), new TypeAnnotationsScanner()));
+        
+        Set<Class<?>> allClasses = reflections.getTypesAnnotatedWith(org.testng.annotations.Test.class);
+        return allClasses.toArray(new Class<?>[0]);
     }
 
     private String extractMethodLogic(Class<?> clazz, String methodName) {
@@ -659,7 +818,7 @@ public class TestNGDocGenerator {
      * @param methodName The name of the test method
      * @return A human-readable explanation of the test method logic
      */
-    private String generateHumanReadableExplanation(String rawCode, String methodName) {
+    String generateHumanReadableExplanation(String rawCode, String methodName) {
         // Remove braces and trim
         String cleanCode = rawCode.replaceAll("^\\{\\s*", "").replaceAll("\\s*\\}$", "").trim();
         
@@ -681,20 +840,13 @@ public class TestNGDocGenerator {
         if (explanation.length() == 0 || true) {
             // Check for test case ID pattern (e.g., TC01_, TC02_, etc.)
             String testCaseId = null;
+            String originalMethodName = methodName; // Store the original method name
             java.util.regex.Pattern tcPattern = java.util.regex.Pattern.compile("^(TC\\d+)_(.*)$");
             java.util.regex.Matcher matcher = tcPattern.matcher(methodName);
             
             if (matcher.find()) {
                 testCaseId = matcher.group(1);
                 methodName = matcher.group(2); // Use the rest of the method name without the TC prefix
-            }
-            
-            // Add a general description based on the method name
-            explanation.append("This test ");
-            
-            // If a test case ID was found, include it
-            if (testCaseId != null) {
-                explanation.append("(").append(testCaseId).append(") ");
             }
             
             // Convert camelCase method name to readable format
@@ -708,14 +860,28 @@ public class TestNGDocGenerator {
                     .replaceAll("when", "\nWhen ")
                     .replaceAll("then", "\nThen ")
                     .replaceAll("test", "")
+                    .replaceAll("_", " ") // Replace underscores with spaces
                     .trim();
                 
                 explanation = new StringBuilder();
+                // Add original method name as title for reference
+                explanation.append("Method: ").append(originalMethodName).append("\n\n");
+                
                 if (testCaseId != null) {
                     explanation.append(testCaseId).append("\n");
                 }
                 explanation.append(readableMethodName).append("\n\n");
             } else {
+                // Add a general description based on the method name
+                explanation.append("This test ");
+                
+                // If a test case ID was found, include it
+                if (testCaseId != null) {
+                    explanation.append("(").append(testCaseId).append(") ");
+                }
+                
+                // For non-Gherkin style, also replace underscores with spaces
+                readableMethodName = readableMethodName.replaceAll("_", " ");
                 explanation.append(readableMethodName).append(".\n\n");
             }
             
@@ -731,7 +897,13 @@ public class TestNGDocGenerator {
             }
         }
         
-        return explanation.toString();
+        // Apply pattern replacements to make the explanation more readable
+        String result = explanation.toString();
+        for (Map.Entry<String, String> entry : patternReplacements.entrySet()) {
+            result = result.replace(entry.getKey(), entry.getValue());
+        }
+        
+        return result;
     }
     
     /**
@@ -787,6 +959,191 @@ public class TestNGDocGenerator {
         return "the test condition is validated";
     }
 
+    private class TestMethodVisitor extends VoidVisitorAdapter<Void> {
+        private final String packageName;
+        private final String className;
+        private final List<TestMethodInfo> testMethods;
+
+        public TestMethodVisitor(String packageName, String className, List<TestMethodInfo> testMethods) {
+            this.packageName = packageName;
+            this.className = className;
+            this.testMethods = testMethods;
+        }
+
+        @Override
+        public void visit(MethodDeclaration n, Void arg) {
+            // Only process methods with TestNG annotations
+            if (n.getAnnotations() != null && n.getAnnotations().stream()
+                    .anyMatch(a -> a.getNameAsString().equals("Test") || 
+                               a.getNameAsString().equals("org.testng.annotations.Test"))) {
+                
+                // Initialize test method info
+                TestMethodInfo methodInfo = new TestMethodInfo();
+                String methodName = n.getNameAsString();
+                methodInfo.setName(methodName);
+                
+                // Check for documentation tags in @Docs annotation
+                n.getAnnotations().stream()
+                    .filter(a -> a.getNameAsString().equals("Docs") || 
+                                a.getNameAsString().equals("io.vinipx.testngdoc.annotations.Docs"))
+                    .findFirst()
+                    .ifPresent(docsAnnotation -> {
+                        docsAnnotation.getChildNodes().stream()
+                            .filter(node -> node instanceof MemberValuePair)
+                            .map(node -> (MemberValuePair) node)
+                            .filter(pair -> pair.getNameAsString().equals("tags"))
+                            .findFirst()
+                            .ifPresent(tagsPair -> {
+                                if (tagsPair.getValue() instanceof ArrayInitializerExpr) {
+                                    ArrayInitializerExpr arrayExpr = (ArrayInitializerExpr) tagsPair.getValue();
+                                    arrayExpr.getValues().stream()
+                                        .filter(value -> value instanceof StringLiteralExpr)
+                                        .map(value -> ((StringLiteralExpr) value).getValue())
+                                        .forEach(methodInfo::addTag);
+                                }
+                            });
+                    });
+                
+                // Get method body to extract JavaDoc comment and method body
+                if (n.getBody().isPresent()) {
+                    String methodBody = n.getBody().get().toString();
+                    methodInfo.setDescription(generateHumanReadableExplanation(methodBody, methodName));
+                }
+                
+                testMethods.add(methodInfo);
+            }
+            super.visit(n, arg);
+        }
+    }
+
+    /**
+     * Extract tags from the @Docs annotation on a method using reflection
+     * @param method The method to check for annotations
+     * @param methodInfo The TestMethodInfo to update with tags
+     */
+    private void extractTagsFromMethod(Method method, TestMethodInfo methodInfo) {
+        try {
+            // Check for io.vinipx.testngdoc.annotations.Docs annotation
+            if (method.isAnnotationPresent(io.vinipx.testngdoc.annotations.Docs.class)) {
+                io.vinipx.testngdoc.annotations.Docs docsAnnotation = 
+                    method.getAnnotation(io.vinipx.testngdoc.annotations.Docs.class);
+                
+                // Add each tag to the method info
+                for (String tag : docsAnnotation.tags()) {
+                    methodInfo.addTag(tag);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error extracting tags from method " + method.getName() + ": " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Set a custom pattern replacement map for improving readability of test documentation.
+     * Keys in the map represent patterns to find, and values represent their replacements.
+     * 
+     * @param patternReplacements Map with pattern replacements (pattern -> replacement)
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator setPatternReplacements(Map<String, String> patternReplacements) {
+        this.patternReplacements = patternReplacements;
+        return this;
+    }
+    
+    /**
+     * Add a single pattern replacement for improving readability of test documentation.
+     * 
+     * @param pattern The pattern to find
+     * @param replacement The replacement text
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator addPatternReplacement(String pattern, String replacement) {
+        this.patternReplacements.put(pattern, replacement);
+        return this;
+    }
+    
+    /**
+     * Clear all pattern replacements.
+     * 
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator clearPatternReplacements() {
+        this.patternReplacements.clear();
+        return this;
+    }
+    
+    /**
+     * Get the current pattern replacement map.
+     * 
+     * @return The current pattern replacement map
+     */
+    public Map<String, String> getPatternReplacements() {
+        return new HashMap<>(this.patternReplacements);
+    }
+
+    /**
+     * Enables dark mode for the generated documentation.
+     *
+     * @return the TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator useDarkMode() {
+        return useDarkMode(true);
+    }
+
+    /**
+     * Sets the dark mode setting for the generated documentation.
+     *
+     * @param enabled whether dark mode should be enabled
+     * @return the TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator useDarkMode(boolean enabled) {
+        this.darkMode = enabled;
+        return this;
+    }
+
+    /**
+     * Set whether to display a pie chart of tag statistics on the index page
+     * @param display True to display the chart, false to hide it
+     * @return This TestNGDocGenerator instance for chaining
+     */
+    public TestNGDocGenerator displayTagsChart(boolean display) {
+        this.displayTagsChart = display;
+        return this;
+    }
+
+    /**
+     * Enable the tag statistics chart on the index page
+     * @return This TestNGDocGenerator instance for chaining
+     */
+    public TestNGDocGenerator displayTagsChart() {
+        return displayTagsChart(true);
+    }
+
+    /**
+     * Sets a custom title for the documentation report.
+     * This will replace the default "TestNG Documentation" title.
+     *
+     * @param title the custom report title
+     * @return the TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator setReportTitle(String title) {
+        if (title != null && !title.trim().isEmpty()) {
+            this.reportTitle = title.trim();
+        }
+        return this;
+    }
+
+    /**
+     * Sets a custom header text to be displayed below the title in the documentation report.
+     *
+     * @param header the custom header text
+     * @return the TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator setReportHeader(String header) {
+        this.reportHeader = header;
+        return this;
+    }
+
     private void generateClassDocumentation(List<TestClassInfo> testClasses, Configuration cfg) 
             throws IOException, TemplateException {
         Template template = cfg.getTemplate("class.ftl");
@@ -797,6 +1154,9 @@ public class TestNGDocGenerator {
             dataModel.put("packageName", testClass.getPackageName());
             dataModel.put("testMethods", testClass.getTestMethods());
             dataModel.put("percentage", testClass.getPercentage());
+            dataModel.put("darkMode", darkMode);
+            dataModel.put("reportTitle", reportTitle);
+            dataModel.put("reportHeader", reportHeader);
             
             try (Writer out = new FileWriter(new File(OUTPUT_DIR, testClass.getClassName() + ".html"))) {
                 template.process(dataModel, out);
@@ -810,9 +1170,45 @@ public class TestNGDocGenerator {
         
         Map<String, Object> dataModel = new HashMap<>();
         dataModel.put("testClasses", testClasses);
-        dataModel.put("totalMethods", testClasses.stream()
+        int totalMethods = testClasses.stream()
                 .mapToInt(tc -> tc.getTestMethods().size())
-                .sum());
+                .sum();
+        dataModel.put("totalMethods", totalMethods);
+        dataModel.put("displayTagsChart", displayTagsChart);
+        dataModel.put("darkMode", darkMode);
+        dataModel.put("reportTitle", reportTitle);
+        dataModel.put("reportHeader", reportHeader);
+        
+        // Only collect tag statistics if the chart is enabled
+        if (displayTagsChart) {
+            // Collect tag statistics
+            Map<String, Integer> tagStats = new HashMap<>();
+            
+            for (TestClassInfo testClass : testClasses) {
+                for (TestMethodInfo method : testClass.getTestMethods()) {
+                    for (String tag : method.getTags()) {
+                        // Group similar tags by their prefix (e.g., "Feature: X" and "Feature: Y" are grouped as "Feature")
+                        String tagCategory = tag;
+                        if (tag.contains(":")) {
+                            tagCategory = tag.substring(0, tag.indexOf(":")).trim();
+                        }
+                        
+                        tagStats.put(tagCategory, tagStats.getOrDefault(tagCategory, 0) + 1);
+                    }
+                }
+            }
+            
+            // Add tag statistics to the data model
+            dataModel.put("tagStats", tagStats);
+            
+            // Calculate percentages for each tag category
+            Map<String, Double> tagPercentages = new HashMap<>();
+            for (Map.Entry<String, Integer> entry : tagStats.entrySet()) {
+                double percentage = (double) entry.getValue() / totalMethods * 100;
+                tagPercentages.put(entry.getKey(), Math.round(percentage * 10) / 10.0); // Round to 1 decimal place
+            }
+            dataModel.put("tagPercentages", tagPercentages);
+        }
         
         try (Writer out = new FileWriter(new File(OUTPUT_DIR, "index.html"))) {
             template.process(dataModel, out);
@@ -855,20 +1251,45 @@ public class TestNGDocGenerator {
     }
 
     public static class TestMethodInfo {
-        private final String name;
-        private final String description;
+        private String name;
+        private String description;
+        private List<String> tags = new ArrayList<>();
 
         public TestMethodInfo(String name, String description) {
             this.name = name;
             this.description = description;
         }
+        
+        // Default constructor for when we build the object incrementally
+        public TestMethodInfo() {
+        }
 
         public String getName() {
             return name;
         }
+        
+        public void setName(String name) {
+            this.name = name;
+        }
 
         public String getDescription() {
             return description;
+        }
+        
+        public void setDescription(String description) {
+            this.description = description;
+        }
+        
+        public List<String> getTags() {
+            return tags;
+        }
+        
+        public void setTags(List<String> tags) {
+            this.tags = tags;
+        }
+        
+        public void addTag(String tag) {
+            this.tags.add(tag);
         }
     }
 }

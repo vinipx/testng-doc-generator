@@ -1,13 +1,22 @@
 # TestNG Documentation Generator
 
+[![Build Status](https://img.shields.io/github/workflow/status/vinipx/testng-doc-generator/Java%20CI)](https://github.com/vinipx/testng-doc-generator/actions)
+[![JitPack](https://jitpack.io/v/vinipx/testng-doc-generator.svg)](https://jitpack.io/#vinipx/testng-doc-generator)
+[![Maven Central](https://img.shields.io/maven-central/v/io.vinipx/testng-doc-generator.svg)](https://search.maven.org/artifact/io.vinipx/testng-doc-generator)
+[![License](https://img.shields.io/github/license/vinipx/testng-doc-generator)](https://github.com/vinipx/testng-doc-generator/blob/main/LICENSE)
+[![Java](https://img.shields.io/badge/java-11%2B-blue)](https://openjdk.java.net/)
+[![TestNG](https://img.shields.io/badge/testng-7.x-green)](https://testng.org)
+
 A Java tool that generates comprehensive documentation for TestNG test classes. This tool analyzes TestNG test methods and produces HTML documentation that includes:
 
 - Test method names and their internal logic
 - Test class grouping of all underlying test methods
 - Summary statistics including the total number of test methods per class and the percentage they represent among all test classes
 - Gherkin-style formatting for BDD-style test method names
+- Tag-based categorization and visualization
+- Custom styling options including dark mode support
 
-## Features
+## 🚀 Features
 
 - Scans for TestNG test classes in a specified package
 - Extracts method logic from source files
@@ -16,8 +25,13 @@ A Java tool that generates comprehensive documentation for TestNG test classes. 
 - Automatically formats Gherkin-style test methods (given/when/then) for better readability
 - Supports multiple theme options (currently Verizon-style theme)
 - Responsive design for mobile and desktop viewing
+- Test Case ID Support
+- **Tag support via @Docs annotation**
+- **Tag statistics visualization with interactive pie chart**
+- **Dark mode support for better readability in low-light environments**
+- **Customizable report title and header**
 
-## Screenshots
+## 📷 Screenshots
 
 Here are some screenshots of the generated documentation:
 
@@ -39,18 +53,30 @@ Here are some screenshots of the generated documentation:
 
 *Example of how test methods with Gherkin-style names are formatted*
 
+### Tag Statistics Chart
+
+![Tag Statistics Chart](docs/images/tag-chart.png)
+
+*Interactive pie chart showing the distribution of test tags across the test suite*
+
+### Dark Mode
+
+![Dark Mode](docs/images/dark-mode.png)
+
+*Dark mode interface for better readability in low-light environments*
+
 > **Note:** To add your own screenshots:
 > 1. Create a `docs/images` directory in the project root
 > 2. Take screenshots of your generated documentation
 > 3. Save the screenshots in the `docs/images` directory
 > 4. Update the image paths in this README if necessary
 
-## Requirements
+## 📋 Requirements
 
 - Java 11 or higher
 - Gradle 7.0 or higher (or use the included Gradle wrapper)
 
-## Using as a Library
+## 🔧 Using as a Library
 
 This project can be used as a library dependency in your test automation framework. For detailed integration instructions, see [INTEGRATION.md](INTEGRATION.md).
 
@@ -74,7 +100,7 @@ Add the JitPack repository to your build file:
     <dependency>
         <groupId>com.github.vinipx</groupId>
         <artifactId>testng-doc-generator</artifactId>
-        <version>v1.0.4</version>
+        <version>v1.0.5</version>
     </dependency>
 </dependencies>
 ```
@@ -83,11 +109,12 @@ Add the JitPack repository to your build file:
 
 ```groovy
 repositories {
+    mavenCentral()
     maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    implementation 'com.github.vinipx:testng-doc-generator:v1.0.4'
+    implementation 'com.github.vinipx:testng-doc-generator:v1.0.5'
 }
 ```
 
@@ -101,7 +128,7 @@ If you've built the project locally, you can use it from your local Maven reposi
 <dependency>
     <groupId>io.vinipx</groupId>
     <artifactId>testng-doc-generator</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
 </dependency>
 ```
 
@@ -109,23 +136,37 @@ If you've built the project locally, you can use it from your local Maven reposi
 
 ```groovy
 dependencies {
-    implementation 'io.vinipx:testng-doc-generator:1.0.4'
+    implementation 'io.vinipx:testng-doc-generator:1.0.5'
 }
 ```
 
 ### Basic Usage
 
 ```java
-import io.vinipx.testngdoc.SimpleTestNGDocGenerator;
+import io.vinipx.testngdoc.TestNGDocGenerator;
 
 public class DocumentationGenerator {
     public static void main(String[] args) {
-        // Generate documentation for a specific directory
-        SimpleTestNGDocGenerator.main(new String[]{"path/to/your/test/classes"});
+        // Create a new generator instance
+        TestNGDocGenerator generator = new TestNGDocGenerator();
+        
+        // Optional: Enable dark mode
+        generator.useDarkMode();
+        
+        // Optional: Enable tag statistics chart
+        generator.displayTagsChart();
+        
+        // Optional: Set custom report title and header
+        generator.setReportTitle("My Test Suite Documentation");
+        generator.setReportHeader("Generated on " + new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()));
+        
+        // Generate documentation
+        generator.generateDocumentation("path/to/your/test/classes");
     }
 }
+```
 
-## Building the Project
+## 🏗️ Building the Project
 
 ```bash
 ./gradlew build
@@ -133,7 +174,7 @@ public class DocumentationGenerator {
 
 This will create a JAR file with dependencies in the `build/libs` directory.
 
-## Publishing to Local Maven Repository
+## 📦 Publishing to Local Maven Repository
 
 To publish the library to your local Maven repository for testing:
 
@@ -141,7 +182,7 @@ To publish the library to your local Maven repository for testing:
 ./gradlew publishToMavenLocal
 ```
 
-## Usage as a Command-Line Tool
+## 💻 Usage as a Command-Line Tool
 
 ```bash
 ./gradlew runGenerator --args="<source-directory>"
@@ -155,14 +196,14 @@ java -jar build/libs/testng-doc-generator-1.0-SNAPSHOT-all.jar <source-directory
 
 Replace `<source-directory>` with the directory containing your TestNG test classes.
 
-## Output
+## 📊 Output
 
 The tool generates HTML documentation in a `testng-docs` directory:
 
 - `index.html`: Summary page with links to all test classes
 - `<ClassName>.html`: Detailed documentation for each test class
 
-## Example
+## 🔍 Example
 
 If your TestNG tests are in the directory `src/test/java/com/example/tests`, run:
 
@@ -170,15 +211,17 @@ If your TestNG tests are in the directory `src/test/java/com/example/tests`, run
 ./gradlew runGenerator --args="src/test/java/com/example/tests"
 ```
 
-## How It Works
+## 🧩 How It Works
 
 1. The tool scans all Java files in the specified directory for TestNG `@Test` annotations
 2. It analyzes the source code of each test method to extract its logic
 3. HTML documentation is generated using Freemarker templates
 4. Statistics are calculated to show the distribution of test methods across classes
 5. For methods with Gherkin-style naming (given/when/then), the tool formats them into a more readable format
+6. Tags from `@Docs` annotations are extracted and categorized
+7. Tag statistics are visualized in a pie chart on the index page
 
-## Gherkin-Style Test Method Formatting
+## 🥒 Gherkin-Style Test Method Formatting
 
 The tool automatically detects and formats test methods that follow BDD naming conventions using given/when/then prefixes. For example:
 
@@ -197,46 +240,62 @@ When User Logs In
 Then Login Succeeds
 ```
 
-The tool handles:
-- CamelCase formatting (separates words properly)
-- Underscore separation
-- Multiple Gherkin steps in a single method name
-- Automatic removal of "Test" suffix
+## 🏷️ Using Tags with @Docs Annotation
 
-### Examples of Supported Method Names
+You can categorize your test methods using the `@Docs` annotation with tags:
 
-| Method Name | Formatted Output |
-|-------------|------------------|
-| `givenWifiOn_whenDeviceIsReboot_thenAvsLogsArePresentTest()` | **Given** Wifi On<br>**When** Device Is Reboot<br>**Then** Avs Logs Are Present |
-| `givenUserProfile_whenUpdatingEmail_thenProfileIsUpdatedTest()` | **Given** User Profile<br>**When** Updating Email<br>**Then** Profile Is Updated |
-| `whenUserLogsOut_thenSessionIsTerminatedTest()` | **When** User Logs Out<br>**Then** Session Is Terminated |
+```java
+import io.vinipx.testngdoc.annotations.Docs;
 
-## Customization
+@Test
+@Docs(tags = {"UI", "Login", "Smoke"})
+public void testLoginPage() {
+    // Test implementation
+}
+```
 
-### Templates
+These tags will be displayed in the documentation and used for statistics visualization. Tags help categorize tests by feature, type, priority, etc.
 
-The HTML templates are stored in the `templates` directory and can be customized to match your preferred styling and layout:
+## ⚙️ Advanced Configuration Options
 
-- `index.ftl`: Template for the main index page
-- `class.ftl`: Template for individual test class pages
+### Dark Mode
 
-### Styling
+Enable dark mode for better readability in low-light environments:
 
-The documentation uses a modern, clean design inspired by Verizon's design system with:
+```java
+TestNGDocGenerator generator = new TestNGDocGenerator();
+generator.useDarkMode();
+// or
+generator.useDarkMode(true); // Enable
+generator.useDarkMode(false); // Disable
+```
 
-- Primary Color: #d52b1e (Verizon Red)
-- Secondary Color: #000000 (Black)
-- Clean typography with Arial/Helvetica font family
-- Responsive layout for all device sizes
-- Color-coded percentage indicators
-- Bold formatting for Gherkin keywords
+### Tag Statistics Chart
 
-To modify the styling, edit the CSS sections in the template files.
+Display a pie chart showing the distribution of tags across your test suite:
 
-## Future Enhancements
+```java
+TestNGDocGenerator generator = new TestNGDocGenerator();
+generator.displayTagsChart();
+// or
+generator.displayTagsChart(true); // Enable
+generator.displayTagsChart(false); // Disable
+```
 
-- Additional theme options
-- Configuration file for customizing colors and styling
-- Support for TestNG groups and dependencies
-- Export options (PDF, Markdown)
-- Integration with CI/CD pipelines
+### Custom Report Title and Header
+
+Customize the title and header of your documentation:
+
+```java
+TestNGDocGenerator generator = new TestNGDocGenerator();
+generator.setReportTitle("Project X Test Documentation");
+generator.setReportHeader("Generated: March 1, 2025");
+```
+
+## 👥 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

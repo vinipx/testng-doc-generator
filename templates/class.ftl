@@ -1,11 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>${className} - TestNG Documentation</title>
+    <title>${className} - ${reportTitle}</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root {
+            <#if darkMode>
+            /* Dark Mode Colors */
+            --primary-color: #ff6b6b;
+            --secondary-color: #ffffff;
+            --accent-color: #a5a5a5;
+            --background-color: #121212;
+            --card-bg-color: #1e1e1e;
+            --text-color: #e1e1e1;
+            --border-color: #333333;
+            --success-color: #4ade80;
+            --warning-color: #facc15;
+            --error-color: #f87171;
+            <#else>
+            /* Light Mode Colors */
             --primary-color: #d52b1e;
             --secondary-color: #000000;
             --accent-color: #757575;
@@ -16,6 +30,7 @@
             --success-color: #2d9d3a;
             --warning-color: #ffb400;
             --error-color: #d52b1e;
+            </#if>
         }
         * {
             box-sizing: border-box;
@@ -50,6 +65,13 @@
             color: var(--secondary-color);
             margin: 15px 0 10px 0;
             font-weight: 600;
+        }
+        .report-subheader {
+            font-size: 1.1rem;
+            color: <#if darkMode>rgba(255, 255, 255, 0.8)<#else>rgba(0, 0, 0, 0.6)</#if>;
+            margin: 5px 0 0 0;
+            font-weight: 400;
+            font-style: italic;
         }
         .class-info {
             background-color: var(--card-bg-color);
@@ -94,6 +116,16 @@
         .method-details p {
             margin-bottom: 5px;
         }
+        .method-details pre {
+            background-color: <#if darkMode>#2a2a2a<#else>#f5f5f5</#if>;
+            color: <#if darkMode>#e0e0e0<#else>#333333</#if>;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            line-height: 1.5;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            border: 1px solid <#if darkMode>#444444<#else>#e0e0e0</#if>;
+        }
         .tag {
             display: inline-block;
             padding: 2px 8px;
@@ -112,6 +144,31 @@
         }
         .tag.error {
             background-color: var(--error-color);
+        }
+        .tag.feature {
+            background-color: #4285F4;
+        }
+        .tag.capability {
+            background-color: #34A853;
+        }
+        .tag.api {
+            background-color: #FBBC05;
+            color: #333;
+        }
+        .tag.ui {
+            background-color: #EA4335;
+        }
+        .tag.other {
+            background-color: #9E9E9E;
+        }
+        .tags-container {
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+        .method-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
         }
         .back-link {
             display: inline-block;
@@ -137,16 +194,6 @@
         }
         .percentage.low {
             background-color: var(--error-color);
-        }
-        pre {
-            background-color: #f5f5f5;
-            padding: 10px;
-            border-radius: 4px;
-            overflow-x: auto;
-            line-height: 1.4;
-            font-family: 'Consolas', 'Monaco', monospace;
-            border: 1px solid var(--border-color);
-            font-size: 12px;
         }
         .nav {
             margin-bottom: 15px;
@@ -184,6 +231,9 @@
 <body>
     <header>
         <h1>${className}</h1>
+        <#if reportHeader??>
+        <h2 class="report-subheader">${reportHeader}</h2>
+        </#if>
     </header>
     
     <div class="nav">
@@ -297,6 +347,25 @@
         </#if>
         
         <div class="method-details">
+            <#if method.tags?has_content>
+            <div class="tags-container">
+                <div class="method-tags">
+                    <#list method.tags as tag>
+                        <#assign tagClass = "other">
+                        <#if tag?lower_case?contains("feature")>
+                            <#assign tagClass = "feature">
+                        <#elseif tag?lower_case?contains("capability")>
+                            <#assign tagClass = "capability">
+                        <#elseif tag?lower_case?contains("api")>
+                            <#assign tagClass = "api">
+                        <#elseif tag?lower_case?contains("ui")>
+                            <#assign tagClass = "ui">
+                        </#if>
+                        <span class="tag ${tagClass}">${tag}</span>
+                    </#list>
+                </div>
+            </div>
+            </#if>
             <pre>${method.description}</pre>
         </div>
     </div>

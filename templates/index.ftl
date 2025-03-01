@@ -1,11 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>TestNG Documentation</title>
+    <title>${reportTitle}</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
+            <#if darkMode>
+            /* Dark Mode Colors */
+            --primary-color: #ff6b6b;
+            --secondary-color: #ffffff;
+            --accent-color: #a5a5a5;
+            --background-color: #121212;
+            --card-bg-color: #1e1e1e;
+            --text-color: #e1e1e1;
+            --border-color: #333333;
+            --success-color: #4ade80;
+            --warning-color: #facc15;
+            --error-color: #f87171;
+            <#else>
+            /* Light Mode Colors */
             --primary-color: #d52b1e;
             --secondary-color: #000000;
             --accent-color: #757575;
@@ -16,6 +31,7 @@
             --success-color: #2d9d3a;
             --warning-color: #ffb400;
             --error-color: #d52b1e;
+            </#if>
         }
         * {
             box-sizing: border-box;
@@ -51,13 +67,26 @@
             margin: 15px 0 10px 0;
             font-weight: 600;
         }
+        .report-subheader {
+            font-size: 1.1rem;
+            color: <#if darkMode>rgba(255, 255, 255, 0.8)<#else>rgba(0, 0, 0, 0.6)</#if>;
+            margin: 5px 0 0 0;
+            font-weight: 400;
+            font-style: italic;
+        }
+        .summary-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
         .summary {
             background-color: var(--card-bg-color);
-            border-radius: 0;
             padding: 15px;
-            margin-bottom: 15px;
+            border-radius: 0;
+            margin-bottom: 0;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             border-left: 3px solid var(--primary-color);
+            flex: 1;
         }
         .summary-item {
             margin-bottom: 8px;
@@ -122,6 +151,31 @@
         .percentage.low {
             background-color: var(--error-color);
         }
+        .charts-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .chart-card {
+            background-color: var(--card-bg-color);
+            padding: 10px;
+            border-radius: 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-left: 3px solid var(--accent-color);
+            flex: 1;
+            min-width: 200px;
+            max-width: 400px;
+        }
+        .chart-card h3 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+        .chart-container {
+            position: relative;
+            height: 150px;
+            width: 100%;
+        }
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -144,18 +198,112 @@
 </head>
 <body>
     <header>
-        <h1>TestNG Documentation</h1>
+        <h1>${reportTitle}</h1>
+        <#if reportHeader??>
+        <h2 class="report-subheader">${reportHeader}</h2>
+        </#if>
     </header>
     
-    <div class="summary">
-        <h2>Summary</h2>
-        <div class="summary-item">
-            <span class="summary-label">Total Test Classes:</span> ${testClasses?size}
+    <div class="summary-container">
+        <div class="summary">
+            <h2>Summary</h2>
+            <div class="summary-item">
+                <span class="summary-label">Total Test Classes:</span> ${testClasses?size}
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Total Test Methods:</span> ${totalMethods}
+            </div>
         </div>
-        <div class="summary-item">
-            <span class="summary-label">Total Test Methods:</span> ${totalMethods}
+        
+        <#if displayTagsChart && tagStats?has_content>
+        <div class="chart-card">
+            <h3>Test Tags Distribution</h3>
+            <div class="chart-container">
+                <canvas id="tagsChart"></canvas>
+            </div>
         </div>
+        </#if>
     </div>
+    
+    <#if displayTagsChart && tagStats?has_content>
+    <script>
+        // Create tag statistics chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('tagsChart').getContext('2d');
+            
+            // Generate random colors for each tag
+            function generateColors(count) {
+                const colors = [];
+                const baseColors = [
+                    'rgba(66, 133, 244, 0.8)',   // Blue
+                    'rgba(52, 168, 83, 0.8)',    // Green
+                    'rgba(251, 188, 5, 0.8)',    // Yellow
+                    'rgba(234, 67, 53, 0.8)',    // Red
+                    'rgba(158, 158, 158, 0.8)',  // Gray
+                    'rgba(103, 58, 183, 0.8)',   // Purple
+                    'rgba(0, 188, 212, 0.8)',    // Cyan
+                    'rgba(255, 152, 0, 0.8)',    // Orange
+                    'rgba(233, 30, 99, 0.8)',    // Pink
+                    'rgba(0, 150, 136, 0.8)',    // Teal
+                ];
+                
+                for (let i = 0; i < count; i++) {
+                    colors.push(baseColors[i % baseColors.length]);
+                }
+                
+                return colors;
+            }
+            
+            // Get tag data
+            const labels = [
+                <#list tagStats?keys as tag>
+                '${tag}',
+                </#list>
+            ];
+            
+            const data = [
+                <#list tagStats?keys as tag>
+                ${tagStats[tag]},
+                </#list>
+            ];
+            
+            // Create chart
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: generateColors(labels.length),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    const dataset = tooltipItem.dataset;
+                                    const index = tooltipItem.dataIndex;
+                                    const value = dataset.data[index] || 0;
+                                    const label = tooltipItem.chart.data.labels[index];
+                                    const total = dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 1000) / 10;
+                                    return `${'$'}{label}: ${'$'}{value} (${'$'}{percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+    </#if>
     
     <h2>Test Classes</h2>
     <table>

@@ -1,11 +1,10 @@
 plugins {
     id 'java-library'
-    id 'maven-publish'
     id 'application'
 }
 
 group = 'io.vinipx'
-version = '1.0.0'
+version = '1.0.5'
 sourceCompatibility = '11'
 targetCompatibility = '11'
 
@@ -25,18 +24,87 @@ dependencies {
     
     // For generating HTML reports
     implementation 'org.freemarker:freemarker:2.3.32'
+    
+    // JUnit for testing
+    testImplementation 'junit:junit:4.13.2'
 }
 
-// Keep the application configuration for local development and testing
+// Main application configuration
 application {
-    mainClassName = 'io.vinipx.testngdoc.SimpleTestNGDocGenerator'
+    mainClass = 'io.vinipx.testngdoc.TestNGDocGenerator'
 }
 
-// Configure the main JAR
+// Task to generate documentation for sample test classes
+task generateDocs(type: JavaExec) {
+    group = 'Documentation'
+    description = 'Generates documentation for sample test classes'
+    
+    classpath = sourceSets.main.runtimeClasspath + sourceSets.test.runtimeClasspath
+    mainClass = 'io.vinipx.testngdoc.TestNGDocGeneratorTest'
+}
+
+// Task to generate documentation for a specific directory
+task generateDocsFromDir(type: JavaExec) {
+    group = 'Documentation'
+    description = 'Generates documentation from a specified source directory'
+    
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'io.vinipx.testngdoc.RunDocGenerator'
+    
+    // Default source directory if none provided
+    args = [project.hasProperty('sourceDir') ? project.getProperty('sourceDir') : 'src/test/java/com/testngdoc/sample']
+}
+
+// Task to run the unit tests
+task runUnitTests(type: Test) {
+    group = 'Verification'
+    description = 'Runs the unit tests for the TestNGDocGenerator'
+    
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    
+    // Include only the unit test classes
+    include '**/TestNGDocGeneratorUnitTest.class'
+    include '**/SimpleTestNGDocGeneratorUnitTest.class'
+    
+    // Show test results in the console
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
+
+// Task to demonstrate the pattern replacement feature
+task demoPatternReplacement(type: JavaExec) {
+    description 'Run the documentation generator to demonstrate pattern replacement'
+    group 'demo'
+    classpath = sourceSets.main.runtimeClasspath + sourceSets.test.runtimeClasspath
+    mainClass = 'com.testngdoc.sample.GenerateDocumentation'
+}
+
+task demoTags(type: JavaExec) {
+    description 'Run the documentation generator to demonstrate @Docs annotation tags'
+    group 'demo'
+    classpath = sourceSets.main.runtimeClasspath + sourceSets.test.runtimeClasspath
+    mainClass = 'com.testngdoc.sample.GenerateDocumentation'
+}
+
+task runGenerator(type: JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.testngdoc.sample.GenerateDocumentation'
+}
+
+// Task to demo all features
+task demoAllFeatures(type: JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    main = 'com.testngdoc.sample.DemoAllFeatures'
+}
+
+// Configure the JAR
 jar {
     manifest {
         attributes(
-            'Main-Class': 'io.vinipx.testngdoc.SimpleTestNGDocGenerator',
+            'Main-Class': 'io.vinipx.testngdoc.TestNGDocGenerator',
             'Implementation-Title': 'TestNG Documentation Generator',
             'Implementation-Version': project.version
         )
@@ -46,118 +114,4 @@ jar {
     from('templates') {
         into 'templates'
     }
-}
-
-// Create a fat jar with all dependencies
-task fatJar(type: Jar) {
-    archiveClassifier = 'all'
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    
-    manifest {
-        attributes(
-            'Main-Class': 'io.vinipx.testngdoc.SimpleTestNGDocGenerator',
-            'Implementation-Title': 'TestNG Documentation Generator',
-            'Implementation-Version': project.version
-        )
-    }
-    
-    from sourceSets.main.output
-    
-    // Include the templates directory in the fat JAR
-    from('templates') {
-        into 'templates'
-    }
-    
-    dependsOn configurations.runtimeClasspath
-    from {
-        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
-    }
-}
-
-// Add a task to generate sources JAR
-task sourcesJar(type: Jar) {
-    archiveClassifier = 'sources'
-    from sourceSets.main.allJava
-}
-
-// Add a task to generate JavaDoc JAR
-task javadocJar(type: Jar) {
-    archiveClassifier = 'javadoc'
-    from javadoc.destinationDir
-    dependsOn javadoc
-}
-
-// Configure Maven publishing
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            
-            // Include the fat JAR
-            artifact fatJar
-            
-            // Include sources and javadoc JARs
-            artifact sourcesJar
-            artifact javadocJar
-            
-            pom {
-                name = 'TestNG Documentation Generator'
-                description = 'A library for generating comprehensive documentation for TestNG test classes'
-                url = 'https://github.com/vinipx/testng-doc-generator'
-                
-                licenses {
-                    license {
-                        name = 'MIT License'
-                        url = 'https://opensource.org/licenses/MIT'
-                    }
-                }
-                
-                developers {
-                    developer {
-                        id = 'vinipx'
-                        name = 'Vinicius Fagundes'
-                        email = 'vinipeixotofagundes@gmail.com'
-                    }
-                }
-                
-                scm {
-                    connection = 'scm:git:git://github.com/vinipx/testng-doc-generator.git'
-                    developerConnection = 'scm:git:ssh://github.com/vinipx/testng-doc-generator.git'
-                    url = 'https://github.com/vinipx/testng-doc-generator'
-                }
-            }
-        }
-    }
-    repositories {
-        maven {
-            name = 'localRepo'
-            url = "${buildDir}/repo"
-        }
-    }
-}
-
-// Add a task to run the application
-task runGenerator(type: JavaExec) {
-    group = 'application'
-    description = 'Run the TestNG documentation generator'
-    classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'io.vinipx.testngdoc.SimpleTestNGDocGenerator'
-    
-    // Default argument if none provided
-    args 'src/test/java/com/testngdoc/sample'
-    
-    doFirst {
-        println "Running TestNG Documentation Generator..."
-    }
-}
-
-// Add sources and javadoc JARs to the published artifacts
-artifacts {
-    archives sourcesJar
-    archives javadocJar
-    archives fatJar
-}
-
-test {
-    useTestNG()
 }

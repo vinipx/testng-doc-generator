@@ -210,11 +210,85 @@ public class CustomDocumentationGenerator {
         // Set custom output directory
         generator.setOutputDir(Paths.get("/path/to/your/custom/output"));
         
+        // Enable dark mode for better readability
+        generator.useDarkMode();
+        
+        // Display tag statistics chart
+        generator.displayTagsChart();
+        
+        // Set custom report title and header
+        generator.setReportTitle("Project X Test Documentation");
+        generator.setReportHeader("Generated on " + new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()));
+        
         // Generate documentation
-        generator.generateDocs("path/to/your/test/classes");
+        generator.generateDocumentation("path/to/your/test/classes");
     }
 }
 ```
+
+### Dark Mode
+
+Enable dark mode for better readability in low-light environments:
+
+```java
+// Simple toggle (on)
+generator.useDarkMode();
+
+// Explicit setting
+generator.useDarkMode(true);  // Enable dark mode
+generator.useDarkMode(false); // Disable dark mode (use light mode)
+```
+
+### Tag Statistics Chart
+
+Display a pie chart showing the distribution of tags across your test suite:
+
+```java
+// Simple toggle (on)
+generator.displayTagsChart();
+
+// Explicit setting
+generator.displayTagsChart(true);  // Enable chart
+generator.displayTagsChart(false); // Disable chart
+```
+
+### Custom Report Title and Header
+
+Customize the title and header of your documentation:
+
+```java
+// Set custom main title (appears in browser tab and as the main heading)
+generator.setReportTitle("My Custom Test Documentation");
+
+// Set optional secondary header (useful for timestamps, version info, etc.)
+generator.setReportHeader("Generated on " + new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()));
+```
+
+## Using the @Docs Annotation
+
+The `@Docs` annotation allows you to add tags to your test methods for better categorization and filtering:
+
+```java
+import io.vinipx.testngdoc.annotations.Docs;
+import org.testng.annotations.Test;
+
+public class UserLoginTests {
+    
+    @Test
+    @Docs(tags = {"UI", "Login", "Smoke"})
+    public void testValidLogin() {
+        // Test implementation
+    }
+    
+    @Test
+    @Docs(tags = {"UI", "Login", "Security", "Negative"})
+    public void testInvalidCredentials() {
+        // Test implementation
+    }
+}
+```
+
+The tags will be displayed in the documentation and included in the tag statistics chart.
 
 ## CI/CD Integration
 
