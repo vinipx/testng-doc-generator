@@ -21,6 +21,8 @@ public class SampleTest {
      * Given a user is on the login page
      * When they enter valid credentials
      * Then they should be logged in successfully
+     * 
+     * @tags authentication, smoke, regression
      */
     @Test(description = "Verify successful login with valid credentials")
     public void testSuccessfulLogin() {
@@ -32,6 +34,8 @@ public class SampleTest {
      * Given a user is on the registration page
      * When they submit the form with valid data
      * Then a new account should be created
+     * 
+     * @tags registration, user-management, regression
      */
     @Test(description = "Verify user registration with valid data")
     public void testUserRegistration() {
@@ -43,6 +47,8 @@ public class SampleTest {
      * Given a user is logged in
      * When they access their profile page
      * Then they should see their account details
+     * 
+     * @tags user-profile, user-management, smoke
      */
     @Test(description = "Verify user can view their profile")
     public void testProfileView() {

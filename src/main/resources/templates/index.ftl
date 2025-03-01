@@ -170,7 +170,7 @@
     </#if>
     <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
+<body<#if darkMode> class="dark-mode"</#if>>
     <header>
         <div class="container">
             <h1>${reportTitle}</h1>
@@ -215,35 +215,75 @@
         
         <#if displayTagsChart && tagPercentages?? && tagPercentages?size gt 0>
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                var ctx = document.getElementById('tagsChart').getContext('2d');
-                var tagsChart = new Chart(ctx, {
+            // Create a pie chart for tags distribution if the container exists
+            const tagsChartContainer = document.getElementById('tagsChart');
+            if (tagsChartContainer) {
+                const ctx = tagsChartContainer.getContext('2d');
+                
+                // Get the current mode (dark or light)
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                
+                // Define colors based on the mode
+                const chartColors = isDarkMode ? 
+                    ['#5c6bc0', '#7986cb', '#9fa8da', '#c5cae9', '#3949ab', '#283593', '#1a237e', '#8c9eff', '#536dfe', '#3d5afe'] : 
+                    ['#3f51b5', '#5c6bc0', '#7986cb', '#9fa8da', '#c5cae9', '#7e57c2', '#5e35b1', '#3949ab', '#303f9f', '#1a237e'];
+                
+                const chartBorderColors = isDarkMode ? 
+                    ['#3949ab', '#5c6bc0', '#7986cb', '#9fa8da', '#283593', '#1a237e', '#0d137a', '#7986cb', '#3d5afe', '#304ffe'] : 
+                    ['#303f9f', '#3f51b5', '#5c6bc0', '#7986cb', '#9fa8da', '#673ab7', '#512da8', '#303f9f', '#283593', '#1a237e'];
+                
+                new Chart(ctx, {
                     type: 'pie',
                     data: {
-                        labels: [<#list tagPercentages?keys as tag>'${tag}',</#list>],
+                        labels: [<#list tagPercentages?keys as tag>'${tag}'<#sep>, </#sep></#list>],
                         datasets: [{
-                            data: [<#list tagPercentages?values as value>${value},</#list>],
-                            backgroundColor: [
-                                '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
-                                '#5a5c69', '#858796', '#6f42c1', '#20c9a6', '#f8f9fc',
-                                '#3a5a8c', '#2c4a7c', '#4d7ab8', '#28a745', '#ffc107'
-                            ]
+                            data: [<#list tagPercentages?values as count>${count}<#sep>, </#sep></#list>],
+                            backgroundColor: chartColors,
+                            borderColor: chartBorderColors,
+                            borderWidth: 1
                         }]
                     },
                     options: {
                         responsive: true,
-                        maintainAspectRatio: true,
                         plugins: {
                             legend: {
                                 position: 'right',
                                 labels: {
-                                    color: '<#if darkMode>#e0e0e0<#else>#333333</#if>'
+                                    color: isDarkMode ? '#e0e0e0' : '#424242',
+                                    font: {
+                                        family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                                        size: 12
+                                    },
+                                    padding: 15
                                 }
+                            },
+                            tooltip: {
+                                backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff',
+                                titleColor: isDarkMode ? '#e0e0e0' : '#424242',
+                                bodyColor: isDarkMode ? '#e0e0e0' : '#424242',
+                                borderColor: isDarkMode ? '#333333' : '#e0e0e0',
+                                borderWidth: 1,
+                                padding: 12,
+                                cornerRadius: 8,
+                                titleFont: {
+                                    family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                bodyFont: {
+                                    family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                                    size: 13
+                                },
+                                displayColors: true,
+                                boxWidth: 10,
+                                boxHeight: 10,
+                                boxPadding: 3,
+                                usePointStyle: true
                             }
                         }
                     }
                 });
-            });
+            }
         </script>
         </#if>
     </div>

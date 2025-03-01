@@ -1179,6 +1179,230 @@ public class TestNGDocGenerator {
         return "the test condition is validated";
     }
 
+    /**
+     * Generates a comprehensive CSS file with all necessary styles for the documentation
+     * @return String containing the complete CSS content
+     */
+    private String generateComprehensiveCSS() {
+        return "/* TestNG Documentation Generator Styles */\n" +
+            ":root {\n" +
+            "    --primary-color: #3f51b5;\n" +
+            "    --secondary-color: #303f9f;\n" +
+            "    --accent-color: #7986cb;\n" +
+            "    --background-color: #fafafa;\n" +
+            "    --card-bg-color: #ffffff;\n" +
+            "    --text-color: #424242;\n" +
+            "    --border-color: #e0e0e0;\n" +
+            "    --success-color: #4caf50;\n" +
+            "    --warning-color: #ff9800;\n" +
+            "    --error-color: #f44336;\n" +
+            "}\n" +
+            "/* Dark mode variables - Modern style */\n" +
+            ".dark-mode {\n" +
+            "    --primary-color: #5c6bc0;\n" +
+            "    --secondary-color: #3949ab;\n" +
+            "    --accent-color: #9fa8da;\n" +
+            "    --background-color: #121212;\n" +
+            "    --card-bg-color: #1e1e1e;\n" +
+            "    --text-color: #e0e0e0;\n" +
+            "    --border-color: #333333;\n" +
+            "    --success-color: #66bb6a;\n" +
+            "    --warning-color: #ffa726;\n" +
+            "    --error-color: #ef5350;\n" +
+            "}\n" +
+            "* {\n" +
+            "    box-sizing: border-box;\n" +
+            "    margin: 0;\n" +
+            "    padding: 0;\n" +
+            "}\n" +
+            "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');\n" +
+            "body {\n" +
+            "    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;\n" +
+            "    line-height: 1.6;\n" +
+            "    color: var(--text-color);\n" +
+            "    background-color: var(--background-color);\n" +
+            "    padding: 0;\n" +
+            "    margin: 0;\n" +
+            "    font-weight: 400;\n" +
+            "    -webkit-font-smoothing: antialiased;\n" +
+            "    -moz-osx-font-smoothing: grayscale;\n" +
+            "}\n" +
+            ".dark-mode body {\n" +
+            "    font-weight: 300;\n" +
+            "}\n" +
+            ".container {\n" +
+            "    max-width: 1200px;\n" +
+            "    margin: 0 auto;\n" +
+            "    padding: 20px;\n" +
+            "}\n" +
+            "header {\n" +
+            "    background-color: var(--primary-color);\n" +
+            "    color: white;\n" +
+            "    padding: 24px 0;\n" +
+            "    margin-bottom: 40px;\n" +
+            "    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);\n" +
+            "}\n" +
+            "h1 {\n" +
+            "    font-size: 2.2rem;\n" +
+            "    margin-bottom: 10px;\n" +
+            "    color: white;\n" +
+            "    font-weight: 600;\n" +
+            "    letter-spacing: -0.5px;\n" +
+            "}\n" +
+            "h2 {\n" +
+            "    font-size: 1.8rem;\n" +
+            "    margin: 30px 0 20px;\n" +
+            "    color: var(--primary-color);\n" +
+            "    border-bottom: 2px solid var(--border-color);\n" +
+            "    padding-bottom: 10px;\n" +
+            "    font-weight: 500;\n" +
+            "}\n" +
+            "h3 {\n" +
+            "    font-size: 1.4rem;\n" +
+            "    margin: 20px 0 12px;\n" +
+            "    color: var(--primary-color);\n" +
+            "    font-weight: 500;\n" +
+            "}\n" +
+            "a {\n" +
+            "    color: var(--primary-color);\n" +
+            "    text-decoration: none;\n" +
+            "    transition: color 0.2s ease, border-bottom 0.2s ease;\n" +
+            "    border-bottom: 1px solid transparent;\n" +
+            "}\n" +
+            "a:hover {\n" +
+            "    text-decoration: none;\n" +
+            "    color: var(--accent-color);\n" +
+            "    border-bottom: 1px solid var(--accent-color);\n" +
+            "}\n" +
+            ".summary-container {\n" +
+            "    display: flex;\n" +
+            "    flex-wrap: wrap;\n" +
+            "    gap: 24px;\n" +
+            "    margin-bottom: 40px;\n" +
+            "}\n" +
+            ".summary {\n" +
+            "    background-color: var(--card-bg-color);\n" +
+            "    border-radius: 12px;\n" +
+            "    padding: 24px;\n" +
+            "    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);\n" +
+            "    border: none;\n" +
+            "    flex: 1;\n" +
+            "    min-width: 300px;\n" +
+            "    transition: transform 0.2s ease, box-shadow 0.2s ease;\n" +
+            "}\n" +
+            ".summary:hover {\n" +
+            "    transform: translateY(-2px);\n" +
+            "    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);\n" +
+            "}\n" +
+            "table {\n" +
+            "    width: 100%;\n" +
+            "    border-collapse: collapse;\n" +
+            "    margin: 24px 0;\n" +
+            "    background-color: var(--card-bg-color);\n" +
+            "    border-radius: 12px;\n" +
+            "    overflow: hidden;\n" +
+            "    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);\n" +
+            "}\n" +
+            "th {\n" +
+            "    background-color: var(--secondary-color);\n" +
+            "    color: white;\n" +
+            "    text-align: left;\n" +
+            "    padding: 16px 20px;\n" +
+            "    font-weight: 500;\n" +
+            "    font-size: 0.95rem;\n" +
+            "    text-transform: uppercase;\n" +
+            "    letter-spacing: 0.5px;\n" +
+            "}\n" +
+            "td {\n" +
+            "    padding: 14px 20px;\n" +
+            "    border-top: 1px solid var(--border-color);\n" +
+            "}\n" +
+            "tr:hover {\n" +
+            "    background-color: rgba(0, 0, 0, 0.02);\n" +
+            "}\n" +
+            ".dark-mode tr:hover {\n" +
+            "    background-color: rgba(255, 255, 255, 0.03);\n" +
+            "}\n" +
+            ".chart-container {\n" +
+            "    background-color: var(--card-bg-color);\n" +
+            "    border-radius: 12px;\n" +
+            "    padding: 24px;\n" +
+            "    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);\n" +
+            "    border: none;\n" +
+            "    flex: 1;\n" +
+            "    min-width: 300px;\n" +
+            "    max-width: 500px;\n" +
+            "    height: 100%;\n" +
+            "    transition: transform 0.2s ease, box-shadow 0.2s ease;\n" +
+            "}\n" +
+            ".chart-container:hover {\n" +
+            "    transform: translateY(-2px);\n" +
+            "    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);\n" +
+            "}\n" +
+            ".method {\n" +
+            "    background-color: var(--card-bg-color);\n" +
+            "    border: none;\n" +
+            "    border-radius: 12px;\n" +
+            "    padding: 24px;\n" +
+            "    margin-bottom: 24px;\n" +
+            "    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);\n" +
+            "    transition: transform 0.2s ease, box-shadow 0.2s ease;\n" +
+            "}\n" +
+            ".method:hover {\n" +
+            "    transform: translateY(-2px);\n" +
+            "    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);\n" +
+            "}\n" +
+            ".method-name {\n" +
+            "    font-weight: 500;\n" +
+            "    font-size: 1.2rem;\n" +
+            "    color: var(--primary-color);\n" +
+            "    margin-bottom: 16px;\n" +
+            "    padding-bottom: 12px;\n" +
+            "    border-bottom: 1px solid var(--border-color);\n" +
+            "}\n" +
+            ".method-description {\n" +
+            "    color: var(--text-color);\n" +
+            "    font-size: 0.95rem;\n" +
+            "    line-height: 1.7;\n" +
+            "}\n" +
+            ".header-note {\n" +
+            "    font-size: 1.1rem;\n" +
+            "    margin-top: 5px;\n" +
+            "    opacity: 0.9;\n" +
+            "    font-weight: 300;\n" +
+            "}\n" +
+            ".chart-title {\n" +
+            "    margin-top: 0;\n" +
+            "    margin-bottom: 16px;\n" +
+            "    font-size: 1.2rem;\n" +
+            "    text-align: center;\n" +
+            "}\n" +
+            "@media (max-width: 768px) {\n" +
+            "    .container {\n" +
+            "        padding: 16px;\n" +
+            "    }\n" +
+            "    h1 {\n" +
+            "        font-size: 1.8rem;\n" +
+            "    }\n" +
+            "    h2 {\n" +
+            "        font-size: 1.5rem;\n" +
+            "    }\n" +
+            "    table {\n" +
+            "        display: block;\n" +
+            "        overflow-x: auto;\n" +
+            "    }\n" +
+            "    th, td {\n" +
+            "        padding: 12px 16px;\n" +
+            "    }\n" +
+            "    .summary-container {\n" +
+            "        flex-direction: column;\n" +
+            "    }\n" +
+            "    .chart-container {\n" +
+            "        max-width: 100%;\n" +
+            "    }\n" +
+            "}\n";
+    }
+
     private void generateClassDocumentation(List<TestClassInfo> testClasses, Configuration cfg) 
             throws IOException, TemplateException {
         Template template = cfg.getTemplate("class.ftl");
@@ -1262,179 +1486,6 @@ public class TestNGDocGenerator {
         try (Writer out = new FileWriter(new File(OUTPUT_DIR, "index.html"))) {
             template.process(dataModel, out);
         }
-    }
-
-    /**
-     * Generates a comprehensive CSS file with all necessary styles for the documentation
-     * @return String containing the complete CSS content
-     */
-    private String generateComprehensiveCSS() {
-        return "/* TestNG Documentation Generator Styles */\n" +
-            ":root {\n" +
-            "    --primary-color: #4a6da7;\n" +
-            "    --secondary-color: #304878;\n" +
-            "    --accent-color: #5d8fdb;\n" +
-            "    --background-color: #f8f9fa;\n" +
-            "    --card-bg-color: #ffffff;\n" +
-            "    --text-color: #333333;\n" +
-            "    --border-color: #e1e4e8;\n" +
-            "    --success-color: #28a745;\n" +
-            "    --warning-color: #ffc107;\n" +
-            "    --error-color: #dc3545;\n" +
-            "}\n" +
-            "/* Dark mode variables */\n" +
-            ".dark-mode {\n" +
-            "    --primary-color: #6d8cbf;\n" +
-            "    --secondary-color: #4a6da7;\n" +
-            "    --accent-color: #7fa8e0;\n" +
-            "    --background-color: #1a1a1a;\n" +
-            "    --card-bg-color: #2d2d2d;\n" +
-            "    --text-color: #e0e0e0;\n" +
-            "    --border-color: #444444;\n" +
-            "    --success-color: #48c774;\n" +
-            "    --warning-color: #ffdd57;\n" +
-            "    --error-color: #f14668;\n" +
-            "}\n" +
-            "* {\n" +
-            "    box-sizing: border-box;\n" +
-            "    margin: 0;\n" +
-            "    padding: 0;\n" +
-            "}\n" +
-            "body {\n" +
-            "    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;\n" +
-            "    line-height: 1.6;\n" +
-            "    color: var(--text-color);\n" +
-            "    background-color: var(--background-color);\n" +
-            "    padding: 0;\n" +
-            "    margin: 0;\n" +
-            "}\n" +
-            ".container {\n" +
-            "    max-width: 1200px;\n" +
-            "    margin: 0 auto;\n" +
-            "    padding: 20px;\n" +
-            "}\n" +
-            "header {\n" +
-            "    background-color: var(--primary-color);\n" +
-            "    color: white;\n" +
-            "    padding: 20px 0;\n" +
-            "    margin-bottom: 30px;\n" +
-            "    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);\n" +
-            "}\n" +
-            "h1 {\n" +
-            "    font-size: 2.2rem;\n" +
-            "    margin-bottom: 10px;\n" +
-            "    color: white;\n" +
-            "}\n" +
-            "h2 {\n" +
-            "    font-size: 1.8rem;\n" +
-            "    margin: 25px 0 15px;\n" +
-            "    color: var(--primary-color);\n" +
-            "    border-bottom: 2px solid var(--border-color);\n" +
-            "    padding-bottom: 10px;\n" +
-            "}\n" +
-            "h3 {\n" +
-            "    font-size: 1.4rem;\n" +
-            "    margin: 20px 0 10px;\n" +
-            "    color: var(--primary-color);\n" +
-            "}\n" +
-            "a {\n" +
-            "    color: var(--accent-color);\n" +
-            "    text-decoration: none;\n" +
-            "}\n" +
-            "a:hover {\n" +
-            "    text-decoration: underline;\n" +
-            "}\n" +
-            ".summary-container {\n" +
-            "    display: flex;\n" +
-            "    flex-wrap: wrap;\n" +
-            "    gap: 20px;\n" +
-            "    margin-bottom: 30px;\n" +
-            "}\n" +
-            ".summary {\n" +
-            "    background-color: var(--card-bg-color);\n" +
-            "    border-radius: 8px;\n" +
-            "    padding: 20px;\n" +
-            "    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);\n" +
-            "    border: 1px solid var(--border-color);\n" +
-            "    flex: 1;\n" +
-            "    min-width: 300px;\n" +
-            "}\n" +
-            "table {\n" +
-            "    width: 100%;\n" +
-            "    border-collapse: collapse;\n" +
-            "    margin: 20px 0;\n" +
-            "    background-color: var(--card-bg-color);\n" +
-            "    border-radius: 8px;\n" +
-            "    overflow: hidden;\n" +
-            "    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);\n" +
-            "}\n" +
-            "th {\n" +
-            "    background-color: var(--secondary-color);\n" +
-            "    color: white;\n" +
-            "    text-align: left;\n" +
-            "    padding: 12px 15px;\n" +
-            "}\n" +
-            "td {\n" +
-            "    padding: 10px 15px;\n" +
-            "    border-top: 1px solid var(--border-color);\n" +
-            "}\n" +
-            "tr:hover {\n" +
-            "    background-color: rgba(0, 0, 0, 0.05);\n" +
-            "}\n" +
-            ".chart-container {\n" +
-            "    background-color: var(--card-bg-color);\n" +
-            "    border-radius: 8px;\n" +
-            "    padding: 20px;\n" +
-            "    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);\n" +
-            "    border: 1px solid var(--border-color);\n" +
-            "    flex: 1;\n" +
-            "    min-width: 300px;\n" +
-            "    max-width: 500px;\n" +
-            "    height: 100%;\n" +
-            "}\n" +
-            ".method {\n" +
-            "    background-color: var(--card-bg-color);\n" +
-            "    border: 1px solid var(--border-color);\n" +
-            "    border-radius: 5px;\n" +
-            "    padding: 20px;\n" +
-            "    margin-bottom: 20px;\n" +
-            "    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);\n" +
-            "}\n" +
-            ".method-name {\n" +
-            "    font-weight: 600;\n" +
-            "    font-size: 1.2rem;\n" +
-            "    color: var(--primary-color);\n" +
-            "    margin-bottom: 15px;\n" +
-            "    padding-bottom: 10px;\n" +
-            "    border-bottom: 1px solid var(--border-color);\n" +
-            "}\n" +
-            ".method-description {\n" +
-            "    color: var(--text-color);\n" +
-            "}\n" +
-            "@media (max-width: 768px) {\n" +
-            "    .container {\n" +
-            "        padding: 15px;\n" +
-            "    }\n" +
-            "    h1 {\n" +
-            "        font-size: 1.8rem;\n" +
-            "    }\n" +
-            "    h2 {\n" +
-            "        font-size: 1.5rem;\n" +
-            "    }\n" +
-            "    table {\n" +
-            "        display: block;\n" +
-            "        overflow-x: auto;\n" +
-            "    }\n" +
-            "    th, td {\n" +
-            "        padding: 8px 10px;\n" +
-            "    }\n" +
-            "    .summary-container {\n" +
-            "        flex-direction: column;\n" +
-            "    }\n" +
-            "    .chart-container {\n" +
-            "        max-width: 100%;\n" +
-            "    }\n" +
-            "}";
     }
 
     /**

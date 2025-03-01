@@ -2,6 +2,7 @@ package com.testngdoc.sample;
 
 import io.vinipx.testngdoc.TestNGDocGenerator;
 import java.io.IOException;
+import java.io.File;
 import freemarker.template.TemplateException;
 
 /**
@@ -15,7 +16,7 @@ public class DemoAllFeatures {
             
             // --- FEATURE: Dark Mode ---
             // Enable dark mode for better readability in low-light environments
-            generator.useDarkMode();
+            //generator.useDarkMode();
             // Alternative: Conditionally enable dark mode
             // generator.useDarkMode(isDarkModePreferred());
             
@@ -31,16 +32,11 @@ public class DemoAllFeatures {
             // Add a subtitle or generation timestamp
             generator.setReportHeader("Generated on " + new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()));
             
-            // Generate documentation
-            // Note how all configuration methods can be chained together
-            // generator.useDarkMode()
-            //         .displayTagsChart()
-            //         .setReportTitle("Project X Test Documentation")
-            //         .setReportHeader("Generated: " + new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()))
-            //         .generateDocumentation("src/test/java/com/testngdoc/sample");
-            
-            // Target your test directory
-            generator.generateDocumentation("src/test/java/com/testngdoc/sample");
+            // Use generateDocumentationFromMultipleSources to include all test directories
+            generator.generateDocumentationFromMultipleSources(
+                new File("src/test/java/io/vinipx/testngdoc").getAbsolutePath(),
+                new File("src/test/java/com/testngdoc/sample").getAbsolutePath()
+            );
             
             System.out.println("Documentation generated successfully!");
         } catch (IOException | TemplateException e) {

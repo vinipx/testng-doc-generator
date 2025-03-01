@@ -164,7 +164,7 @@
         }
     </style>
 </head>
-<body>
+<body<#if darkMode> class="dark-mode"</#if>>
     <header>
         <div class="container">
             <h1>${className}</h1>
