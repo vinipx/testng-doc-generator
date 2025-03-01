@@ -62,14 +62,40 @@ public class SimpleTestNGDocGenerator {
     private Configuration initializeFreemarker() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_32);
         
-        // Create template directory if it doesn't exist
-        Path templatePath = Paths.get(TEMPLATE_DIR);
-        if (!Files.exists(templatePath)) {
-            Files.createDirectories(templatePath);
-            createDefaultTemplates(templatePath);
+        // First try to use templates from the classpath resources (highest priority)
+        try {
+            // Check if templates exist in classpath resources
+            InputStream classTemplateStream = getClass().getClassLoader().getResourceAsStream("templates/class.ftl");
+            InputStream indexTemplateStream = getClass().getClassLoader().getResourceAsStream("templates/index.ftl");
+            
+            if (classTemplateStream != null && indexTemplateStream != null) {
+                // Templates exist in classpath, use them
+                classTemplateStream.close();
+                indexTemplateStream.close();
+                cfg.setClassLoaderForTemplateLoading(getClass().getClassLoader(), "templates");
+                return cfg;
+            }
+        } catch (Exception e) {
+            System.out.println("Could not load templates from classpath: " + e.getMessage());
         }
         
-        cfg.setDirectoryForTemplateLoading(new File(TEMPLATE_DIR));
+        // If not found in classpath, try to use templates from the file system
+        Path templatePath = Paths.get(TEMPLATE_DIR);
+        if (!Files.exists(templatePath)) {
+            try {
+                Files.createDirectories(templatePath);
+                createDefaultTemplates(templatePath);
+                cfg.setDirectoryForTemplateLoading(new File(TEMPLATE_DIR));
+            } catch (IOException e) {
+                System.out.println("Could not create template directory: " + e.getMessage());
+                // Last resort: use classpath resources with default templates
+                cfg.setClassLoaderForTemplateLoading(getClass().getClassLoader(), "templates");
+            }
+        } else {
+            // Template directory exists, use it
+            cfg.setDirectoryForTemplateLoading(new File(TEMPLATE_DIR));
+        }
+        
         cfg.setDefaultEncoding("UTF-8");
         return cfg;
     }
@@ -80,7 +106,7 @@ public class SimpleTestNGDocGenerator {
             "<!DOCTYPE html>\n" +
             "<html>\n" +
             "<head>\n" +
-            "    <title>${className} - TestNG Documentation</title>\n" +
+            "    <title>${className} - ${reportTitle}</title>\n" +
             "    <meta charset=\"UTF-8\">\n" +
             "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
             "    <style>\n" +
@@ -256,7 +282,7 @@ public class SimpleTestNGDocGenerator {
             "<!DOCTYPE html>\n" +
             "<html>\n" +
             "<head>\n" +
-            "    <title>TestNG Documentation</title>\n" +
+            "    <title>${reportTitle}</title>\n" +
             "    <meta charset=\"UTF-8\">\n" +
             "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
             "    <style>\n" +
@@ -388,7 +414,7 @@ public class SimpleTestNGDocGenerator {
             "<body>\n" +
             "    <header>\n" +
             "        <div class=\"container\">\n" +
-            "            <h1>TestNG Documentation</h1>\n" +
+            "            <h1>${reportTitle}</h1>\n" +
             "        </div>\n" +
             "    </header>\n" +
             "    <div class=\"container\">\n" +
@@ -501,6 +527,8 @@ public class SimpleTestNGDocGenerator {
             dataModel.put("packageName", testClass.getPackageName());
             dataModel.put("testMethods", testClass.getTestMethods());
             dataModel.put("percentage", testClass.getPercentage());
+            dataModel.put("reportTitle", "TestNG Documentation");
+            dataModel.put("darkMode", false);
             
             try (Writer out = new FileWriter(new File(OUTPUT_DIR, testClass.getClassName() + ".html"))) {
                 template.process(dataModel, out);
@@ -517,6 +545,9 @@ public class SimpleTestNGDocGenerator {
         dataModel.put("totalMethods", testClasses.stream()
                 .mapToInt(tc -> tc.getTestMethods().size())
                 .sum());
+        dataModel.put("reportTitle", "TestNG Documentation");
+        dataModel.put("darkMode", false);
+        dataModel.put("displayTagsChart", false);
         
         try (Writer out = new FileWriter(new File(OUTPUT_DIR, "index.html"))) {
             template.process(dataModel, out);

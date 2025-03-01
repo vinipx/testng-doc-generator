@@ -11,15 +11,15 @@ targetCompatibility = '11'
 repositories {
     mavenCentral()
     mavenLocal() // For local testing
-    maven { url 'https://jitpack.io' } // Add JitPack repository
+    // maven { url 'https://jitpack.io' } // Remove JitPack repository
 }
 
 dependencies {
-    // Use the TestNG Documentation Generator from JitPack
-    implementation 'com.github.vinipx:testng-doc-generator:v1.0.4'
+    // Use the TestNG Documentation Generator from local Maven repository
+    implementation 'io.vinipx:testng-doc-generator:1.2.5'
     
-    // Alternatively, use from local Maven repository
-    // implementation 'io.vinipx:testng-doc-generator:1.0.0'
+    // Alternatively, use from JitPack
+    // implementation 'com.github.vinipx:testng-doc-generator:v1.2.5'
     
     // TestNG for running tests
     testImplementation 'org.testng:testng:7.7.1'
