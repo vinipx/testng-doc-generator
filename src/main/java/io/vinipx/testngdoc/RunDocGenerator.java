@@ -7,11 +7,11 @@ import java.util.List;
  * Simple class to run the TestNGDocGenerator
  * 
  * Usage:
- * java -jar testng-doc-generator.jar <source-directory> [<additional-source-directory>...] [--package <package-name>...] [--output <output-directory>]
+ * java -jar testng-doc-generator.jar &lt;source-directory&gt; [&lt;additional-source-directory&gt;...] [--package &lt;package-name&gt;...] [--output &lt;output-directory&gt;]
  * 
  * Options:
- * --package <package-name>     Specify a package to scan for TestNG classes
- * --output <output-directory>  Specify the output directory for the generated documentation (default: testng-docs)
+ * --package &lt;package-name&gt;     Specify a package to scan for TestNG classes
+ * --output &lt;output-directory&gt;  Specify the output directory for the generated documentation (default: testng-docs)
  */
 public class RunDocGenerator {
     
