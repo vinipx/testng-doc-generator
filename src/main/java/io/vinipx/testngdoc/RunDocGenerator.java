@@ -20,7 +20,7 @@ public class RunDocGenerator {
             TestNGDocGenerator generator = new TestNGDocGenerator()
                 .useDarkMode(true)
                 .displayTagsChart()
-                .setReportTitle("TestNG Documentation v1.2.1")
+                .setReportTitle("TestNG Documentation v1.2.2")
                 .setReportHeader("Generated on " + java.time.LocalDate.now() + " with custom settings");
             
             // Parse arguments to separate source directories and packages
