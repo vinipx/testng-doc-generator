@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'io.vinipx'
-version = '1.2.2'
+version = '1.2.3'
 sourceCompatibility = '11'
 targetCompatibility = '11'
 
@@ -130,6 +130,13 @@ task runGenerator(type: JavaExec) {
 task demoAllFeatures(type: JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     main = 'com.testngdoc.sample.DemoAllFeatures'
+}
+
+task testStyles(type: JavaExec) {
+    description = 'Test different styling configurations (dark mode, headers)'
+    group = 'Demo'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.testngdoc.sample.StyleTestGenerator'
 }
 
 // Configure Java artifacts
