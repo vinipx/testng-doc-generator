@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'io.vinipx'
-version = '1.2.4'
+version = '1.2.5'
 sourceCompatibility = '11'
 targetCompatibility = '11'
 
@@ -151,6 +151,13 @@ task testCustomOutputDirectory(type: JavaExec) {
     group = 'Demo'
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'com.testngdoc.sample.CustomOutputDirectoryExample'
+}
+
+task testMethodFiltering(type: JavaExec) {
+    description = 'Test method filtering functionality'
+    group = 'Demo'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.testngdoc.sample.MethodFilteringExample'
 }
 
 // Configure Java artifacts

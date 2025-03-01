@@ -43,6 +43,11 @@ public class TestNGDocGenerator {
     private boolean darkMode = false;
     private String reportTitle = "TestNG Documentation";
     private String reportHeader = null;
+    // Method filtering options
+    private List<String> includeMethodPatterns = new ArrayList<>();
+    private List<String> excludeMethodPatterns = new ArrayList<>();
+    private List<String> includeTagPatterns = new ArrayList<>();
+    private List<String> excludeTagPatterns = new ArrayList<>();
 
     public static void main(String[] args) {
         if (args.length < 1) {
@@ -780,6 +785,9 @@ public class TestNGDocGenerator {
                     // Visit all method declarations
                     cu.accept(new TestMethodVisitor(packageName, className, testMethods), null);
                     
+                    // Apply method filtering
+                    testMethods = filterTestMethods(testMethods);
+                    
                     if (!testMethods.isEmpty()) {
                         TestClassInfo classInfo = new TestClassInfo(
                                 className,
@@ -1359,6 +1367,77 @@ public class TestNGDocGenerator {
         return this;
     }
 
+    /**
+     * Add a pattern to include test methods whose names match the pattern.
+     * Only methods matching at least one include pattern will be included in the documentation.
+     * If no include patterns are specified, all methods will be included (unless excluded).
+     * 
+     * @param pattern Regular expression pattern to match method names
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator includeMethodPattern(String pattern) {
+        if (pattern != null && !pattern.trim().isEmpty()) {
+            this.includeMethodPatterns.add(pattern.trim());
+        }
+        return this;
+    }
+
+    /**
+     * Add a pattern to exclude test methods whose names match the pattern.
+     * Methods matching any exclude pattern will be excluded from the documentation.
+     * 
+     * @param pattern Regular expression pattern to match method names
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator excludeMethodPattern(String pattern) {
+        if (pattern != null && !pattern.trim().isEmpty()) {
+            this.excludeMethodPatterns.add(pattern.trim());
+        }
+        return this;
+    }
+
+    /**
+     * Add a pattern to include test methods with tags matching the pattern.
+     * Only methods with at least one tag matching an include pattern will be included in the documentation.
+     * If no include tag patterns are specified, all methods will be included (unless excluded).
+     * 
+     * @param pattern Regular expression pattern to match tags
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator includeTagPattern(String pattern) {
+        if (pattern != null && !pattern.trim().isEmpty()) {
+            this.includeTagPatterns.add(pattern.trim());
+        }
+        return this;
+    }
+
+    /**
+     * Add a pattern to exclude test methods with tags matching the pattern.
+     * Methods with any tag matching an exclude pattern will be excluded from the documentation.
+     * 
+     * @param pattern Regular expression pattern to match tags
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator excludeTagPattern(String pattern) {
+        if (pattern != null && !pattern.trim().isEmpty()) {
+            this.excludeTagPatterns.add(pattern.trim());
+        }
+        return this;
+    }
+
+    /**
+     * Clear all method filtering patterns.
+     * 
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator clearMethodFilters() {
+        this.includeMethodPatterns.clear();
+        this.excludeMethodPatterns.clear();
+        this.includeTagPatterns.clear();
+        this.excludeTagPatterns.clear();
+        return this;
+    }
+
     // Inner classes for storing test information
     public static class TestClassInfo {
         private final String className;
@@ -1435,5 +1514,53 @@ public class TestNGDocGenerator {
         public void addTag(String tag) {
             this.tags.add(tag);
         }
+    }
+
+    /**
+     * Filter test methods based on include/exclude patterns
+     * 
+     * @param methods List of test methods to filter
+     * @return Filtered list of test methods
+     */
+    private List<TestMethodInfo> filterTestMethods(List<TestMethodInfo> methods) {
+        if (includeMethodPatterns.isEmpty() && excludeMethodPatterns.isEmpty() && 
+            includeTagPatterns.isEmpty() && excludeTagPatterns.isEmpty()) {
+            // No filtering needed
+            return methods;
+        }
+        
+        return methods.stream()
+            .filter(method -> {
+                // Check exclude method patterns first (if any match, exclude the method)
+                if (!excludeMethodPatterns.isEmpty() && 
+                    excludeMethodPatterns.stream().anyMatch(pattern -> method.getName().matches(pattern))) {
+                    return false;
+                }
+                
+                // Check exclude tag patterns (if any match, exclude the method)
+                if (!excludeTagPatterns.isEmpty() && 
+                    method.getTags().stream().anyMatch(tag -> 
+                        excludeTagPatterns.stream().anyMatch(pattern -> tag.matches(pattern)))) {
+                    return false;
+                }
+                
+                // Check include method patterns (if any are specified and none match, exclude the method)
+                if (!includeMethodPatterns.isEmpty() && 
+                    includeMethodPatterns.stream().noneMatch(pattern -> method.getName().matches(pattern))) {
+                    return false;
+                }
+                
+                // Check include tag patterns (if any are specified and none match, exclude the method)
+                if (!includeTagPatterns.isEmpty() && 
+                    (method.getTags().isEmpty() || 
+                     method.getTags().stream().noneMatch(tag -> 
+                        includeTagPatterns.stream().anyMatch(pattern -> tag.matches(pattern))))) {
+                    return false;
+                }
+                
+                // Include the method if it passed all filters
+                return true;
+            })
+            .collect(Collectors.toList());
     }
 }

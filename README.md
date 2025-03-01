@@ -16,6 +16,15 @@ A Java tool that generates comprehensive documentation for TestNG test classes. 
 - Tag-based categorization and visualization
 - Custom styling options including dark mode support
 - Flexible output directory configuration
+- Test Case ID Support
+- **Tag support via @Docs annotation**
+- **Tag statistics visualization with interactive pie chart**
+- **Dark mode support for better readability in low-light environments**
+- **Customizable report title and header**
+- **Multi-source directory scanning for projects with complex structures**
+- **Package specification feature for scanning specific packages**
+- **Flexible output directory configuration**
+- **Test method filtering for selective documentation generation**
 
 ## 🚀 Features
 
@@ -34,6 +43,7 @@ A Java tool that generates comprehensive documentation for TestNG test classes. 
 - **Multi-source directory scanning for projects with complex structures**
 - **Package specification feature for scanning specific packages**
 - **Flexible output directory configuration**
+- **Test method filtering for selective documentation generation**
 
 ## 📷 Screenshots
 
@@ -101,7 +111,7 @@ Add the JitPack repository to your build file:
     <dependency>
         <groupId>com.github.vinipx</groupId>
         <artifactId>testng-doc-generator</artifactId>
-        <version>v1.2.4</version>
+        <version>v1.2.5</version>
     </dependency>
 </dependencies>
 ```
@@ -113,7 +123,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.vinipx:testng-doc-generator:v1.2.4'
+    implementation 'com.github.vinipx:testng-doc-generator:v1.2.5'
 }
 ```
 
@@ -126,14 +136,14 @@ The TestNG Documentation Generator is also available from Maven Central:
 <dependency>
     <groupId>io.vinipx</groupId>
     <artifactId>testng-doc-generator</artifactId>
-    <version>1.2.4</version>
+    <version>1.2.5</version>
 </dependency>
 ```
 
 **Gradle:**
 ```groovy
 dependencies {
-    implementation 'io.vinipx:testng-doc-generator:1.2.4'
+    implementation 'io.vinipx:testng-doc-generator:1.2.5'
 }
 ```
 
@@ -146,14 +156,14 @@ If you've built the project locally, you can use it from your local Maven reposi
 <dependency>
     <groupId>io.vinipx</groupId>
     <artifactId>testng-doc-generator</artifactId>
-    <version>1.2.4</version>
+    <version>1.2.5</version>
 </dependency>
 ```
 
 **Gradle:**
 ```groovy
 dependencies {
-    implementation 'io.vinipx:testng-doc-generator:1.2.4'
+    implementation 'io.vinipx:testng-doc-generator:1.2.5'
 }
 ```
 
@@ -183,6 +193,12 @@ public class DocumentationGenerator {
         // Optional: Set custom report title and header
         generator.setReportTitle("My Test Suite Documentation");
         generator.setReportHeader("Generated on " + new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()));
+        
+        // Optional: Filter test methods
+        generator.includeMethodPattern(".*should.*");  // Only include methods containing "should"
+        generator.excludeMethodPattern(".*legacy.*");  // Exclude methods containing "legacy"
+        generator.includeTagPattern("Priority: High"); // Only include methods with high priority tag
+        generator.excludeTagPattern("Slow");          // Exclude methods with the "Slow" tag
         
         // Generate documentation from a single source directory
         try {
@@ -217,7 +233,7 @@ public class DocumentationGenerator {
 ### Basic Usage
 
 ```bash
-java -jar testng-doc-generator.jar <source-directory> [--output <output-directory>]
+java -jar testng-doc-generator.jar <source-directory> [--output <output-directory>] [--include-method <pattern>] [--exclude-method <pattern>] [--include-tag <pattern>] [--exclude-tag <pattern>]
 ```
 
 You can also specify a custom output directory using the `--output` parameter:
@@ -370,6 +386,35 @@ generator.setReportTitle("Project X Test Documentation");
 generator.setReportHeader("Generated: March 1, 2025");
 ```
 
+### Method Filtering
+
+You can selectively include or exclude test methods from the documentation based on their names or tags:
+
+```java
+TestNGDocGenerator generator = new TestNGDocGenerator();
+
+// Include only methods that contain "should" in their name
+generator.includeMethodPattern(".*should.*");
+
+// Exclude methods that contain "legacy" in their name
+generator.excludeMethodPattern(".*legacy.*");
+
+// Include only methods with the "Priority: High" tag
+generator.includeTagPattern("Priority: High");
+
+// Exclude methods with the "Slow" tag
+generator.excludeTagPattern("Slow");
+
+// Clear all filters if needed
+generator.clearMethodFilters();
+```
+
+This feature is useful for:
+- Creating focused documentation for specific test categories
+- Excluding deprecated or legacy tests from documentation
+- Generating documentation for only high-priority tests
+- Creating different documentation sets for different audiences
+
 ## 📊 Output
 
 By default, the tool generates HTML documentation in a `testng-docs` directory. You can customize this using the `setOutputDirectory()` method or the `--output` command-line parameter:
@@ -402,7 +447,7 @@ To publish the library to your local Maven repository for testing:
 Or run the JAR directly:
 
 ```bash
-java -jar build/libs/testng-doc-generator-1.2.4-all.jar <source-directory>
+java -jar build/libs/testng-doc-generator-1.2.5-all.jar <source-directory>
 ```
 
 Replace `<source-directory>` with the directory containing your TestNG test classes.
