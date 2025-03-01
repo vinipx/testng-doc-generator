@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'io.vinipx'
-version = '1.1.1'
+version = '1.2.0'
 sourceCompatibility = '11'
 targetCompatibility = '11'
 
@@ -91,12 +91,29 @@ task demoTags(type: JavaExec) {
     mainClass = 'com.testngdoc.sample.GenerateDocumentation'
 }
 
+// Task to demonstrate multi-source directory scanning
+task demoMultiSourceScanning(type: JavaExec) {
+    description = 'Run the documentation generator to demonstrate multi-source directory scanning'
+    group = 'Demo'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'io.vinipx.testngdoc.RunDocGenerator'
+    args = ['src/test/java', 'src/main/java']
+}
+
+// Task to demonstrate combined source directory and package scanning
+task demoSourceAndPackageScanning(type: JavaExec) {
+    description = 'Run the documentation generator to demonstrate combined source directory and package scanning'
+    group = 'Demo'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'io.vinipx.testngdoc.RunDocGenerator'
+    args = ['src/test/java', '--package', 'com.testngdoc.sample']
+}
+
 task runGenerator(type: JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'com.testngdoc.sample.GenerateDocumentation'
 }
 
-// Task to demo all features
 task demoAllFeatures(type: JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     main = 'com.testngdoc.sample.DemoAllFeatures'
@@ -185,20 +202,8 @@ signing {
     sign publishing.publications.mavenJava
 }
 
-// Task to help with JitPack publication
-// NOTE: These tasks are now redundant with java.withJavadocJar() and java.withSourcesJar()
-// but keeping for backward compatibility with JitPack
-task sourcesJar(type: Jar) {
-    archiveClassifier.set('sources')
-    from sourceSets.main.allJava
-}
-
-task javadocJar(type: Jar) {
-    archiveClassifier.set('javadoc')
-    from javadoc.destinationDir
-}
+// NOTE: Removed redundant sourcesJar and javadocJar tasks
+// as they are already provided by java.withJavadocJar() and java.withSourcesJar()
 
 artifacts {
-    archives sourcesJar
-    archives javadocJar
 }

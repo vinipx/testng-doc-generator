@@ -70,6 +70,54 @@ generator.setReportTitle("Custom Documentation Title");
 generator.setReportHeader("Generated on March 1, 2025");
 ```
 
+### Multi-Source Directory Scanning
+
+Scan multiple source directories for TestNG test classes:
+
+- Support for complex project structures with multiple test modules
+- Unified documentation from distributed test files
+- Consolidated statistics across all discovered test classes
+- Ideal for monorepo projects, microservices, and legacy codebases
+
+Use with:
+```java
+generator.generateDocumentationFromMultipleSources(
+    "src/test/java",
+    "src/integration-test/java",
+    "modules/api-tests/src/test/java"
+);
+```
+
+### Package-Based Scanning
+
+Scan specific packages for TestNG test classes:
+
+- Target specific packages regardless of source directory structure
+- Reflection-based discovery of test classes
+- Useful for focused documentation of specific test areas
+- Efficient for large codebases where you only need to document certain packages
+
+Use with:
+```java
+generator.generateDocumentationFromPackage("com.example.tests.api");
+```
+
+### Combined Source Directory and Package Scanning
+
+Maximum flexibility with combined scanning approach:
+
+- Scan both source directories and specific packages in a single operation
+- Mix file system-based and reflection-based scanning
+- Perfect for complex project structures with non-standard organization
+- Allows precise control over which tests are included in documentation
+
+Use with:
+```java
+String[] sourceDirectories = {"src/test/java", "src/integration-test/java"};
+String[] packages = {"com.example.tests.api", "com.example.tests.ui"};
+generator.generateDocumentationFromSourcesAndPackages(sourceDirectories, packages);
+```
+
 ## Additional Features
 
 - **Test Case ID Support**: Automatically detects and highlights test case IDs

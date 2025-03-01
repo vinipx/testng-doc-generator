@@ -27,7 +27,7 @@ Then add the dependency:
 <dependency>
     <groupId>com.github.vinipx</groupId>
     <artifactId>testng-doc-generator</artifactId>
-    <version>v1.0.4</version>
+    <version>v1.2.0</version>
 </dependency>
 ```
 
@@ -45,7 +45,7 @@ Then add the dependency:
 
 ```groovy
 dependencies {
-    implementation 'com.github.vinipx:testng-doc-generator:v1.0.4'
+    implementation 'com.github.vinipx:testng-doc-generator:v1.2.0'
 }
 ```
 
@@ -61,7 +61,7 @@ Add the dependency to your `pom.xml`:
 <dependency>
     <groupId>io.vinipx</groupId>
     <artifactId>testng-doc-generator</artifactId>
-    <version>1.0.4</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
@@ -71,7 +71,7 @@ Add the dependency to your `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'io.vinipx:testng-doc-generator:1.0.4'
+    implementation 'io.vinipx:testng-doc-generator:1.2.0'
 }
 ```
 
@@ -263,6 +263,51 @@ generator.setReportTitle("My Custom Test Documentation");
 // Set optional secondary header (useful for timestamps, version info, etc.)
 generator.setReportHeader("Generated on " + new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()));
 ```
+
+### Multi-Source Directory Scanning
+
+For projects with complex directory structures or multiple test modules:
+
+```java
+// Scan multiple source directories
+TestNGDocGenerator generator = new TestNGDocGenerator();
+generator.generateDocumentationFromMultipleSources(
+    "src/test/java",
+    "src/integration-test/java",
+    "modules/api-tests/src/test/java",
+    "modules/ui-tests/src/test/java"
+);
+```
+
+### Package Scanning
+
+For scanning specific packages:
+
+```java
+// Scan a specific package
+TestNGDocGenerator generator = new TestNGDocGenerator();
+generator.generateDocumentationFromPackage("com.example.tests");
+```
+
+### Combined Source Directory and Package Scanning
+
+For maximum flexibility, combine source directory and package scanning:
+
+```java
+// Scan both source directories and specific packages
+TestNGDocGenerator generator = new TestNGDocGenerator();
+String[] sourceDirectories = {
+    "src/test/java",
+    "src/integration-test/java"
+};
+String[] packages = {
+    "com.example.tests.api",
+    "com.example.tests.ui"
+};
+generator.generateDocumentationFromSourcesAndPackages(sourceDirectories, packages);
+```
+
+This approach is ideal for projects with a mix of standard and non-standard directory structures.
 
 ## Using the @Docs Annotation
 

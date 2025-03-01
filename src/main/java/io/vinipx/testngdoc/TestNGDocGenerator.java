@@ -167,6 +167,101 @@ public class TestNGDocGenerator {
         System.out.println("Documentation generated in: " + OUTPUT_DIR);
     }
 
+    /**
+     * Generate documentation for TestNG test classes in multiple source directories
+     * 
+     * @param sourceDirectories Array of directories containing Java source files
+     * @throws IOException If an I/O error occurs
+     * @throws TemplateException If a template error occurs
+     */
+    public void generateDocumentationFromMultipleSources(String... sourceDirectories) throws IOException, TemplateException {
+        // Create output directory if it doesn't exist
+        createOutputDirectory();
+        
+        // Initialize FreeMarker
+        Configuration cfg = initializeFreemarker();
+        
+        // Scan for TestNG classes in all source directories
+        List<TestClassInfo> allTestClasses = new ArrayList<>();
+        
+        for (String sourceDirectory : sourceDirectories) {
+            List<TestClassInfo> testClasses = scanForTestClassesFromSource(sourceDirectory);
+            allTestClasses.addAll(testClasses);
+        }
+        
+        // Recalculate percentages based on the total number of test methods
+        int totalTestMethods = allTestClasses.stream()
+                .mapToInt(classInfo -> classInfo.getTestMethods().size())
+                .sum();
+                
+        if (totalTestMethods > 0) {
+            for (TestClassInfo classInfo : allTestClasses) {
+                double percentage = (double) classInfo.getTestMethods().size() / totalTestMethods * 100;
+                classInfo.setPercentage(String.format("%.1f", percentage));
+            }
+        }
+        
+        // Generate documentation
+        generateClassDocumentation(allTestClasses, cfg);
+        generateIndexPage(allTestClasses, cfg);
+        
+        System.out.println("Documentation generated in: " + OUTPUT_DIR);
+    }
+    
+    /**
+     * Generate documentation for TestNG test classes from a combination of source directories and packages
+     * 
+     * @param sourceDirectories Array of directories containing Java source files
+     * @param packages Array of packages to scan for TestNG classes
+     * @throws IOException If an I/O error occurs
+     * @throws TemplateException If a template error occurs
+     */
+    public void generateDocumentationFromSourcesAndPackages(String[] sourceDirectories, String[] packages) 
+            throws IOException, TemplateException {
+        // Create output directory if it doesn't exist
+        createOutputDirectory();
+        
+        // Initialize FreeMarker
+        Configuration cfg = initializeFreemarker();
+        
+        // Scan for TestNG classes in all source directories and packages
+        List<TestClassInfo> allTestClasses = new ArrayList<>();
+        
+        // First, scan source directories
+        if (sourceDirectories != null && sourceDirectories.length > 0) {
+            for (String sourceDirectory : sourceDirectories) {
+                List<TestClassInfo> testClasses = scanForTestClassesFromSource(sourceDirectory);
+                allTestClasses.addAll(testClasses);
+            }
+        }
+        
+        // Then, scan packages
+        if (packages != null && packages.length > 0) {
+            for (String packageName : packages) {
+                List<TestClassInfo> testClasses = scanForTestClasses(packageName);
+                allTestClasses.addAll(testClasses);
+            }
+        }
+        
+        // Recalculate percentages based on the total number of test methods
+        int totalTestMethods = allTestClasses.stream()
+                .mapToInt(classInfo -> classInfo.getTestMethods().size())
+                .sum();
+                
+        if (totalTestMethods > 0) {
+            for (TestClassInfo classInfo : allTestClasses) {
+                double percentage = (double) classInfo.getTestMethods().size() / totalTestMethods * 100;
+                classInfo.setPercentage(String.format("%.1f", percentage));
+            }
+        }
+        
+        // Generate documentation
+        generateClassDocumentation(allTestClasses, cfg);
+        generateIndexPage(allTestClasses, cfg);
+        
+        System.out.println("Documentation generated in: " + OUTPUT_DIR);
+    }
+
     private void createOutputDirectory() throws IOException {
         Path outputPath = Paths.get(OUTPUT_DIR);
         if (!Files.exists(outputPath)) {

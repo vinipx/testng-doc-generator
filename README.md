@@ -30,6 +30,8 @@ A Java tool that generates comprehensive documentation for TestNG test classes. 
 - **Tag statistics visualization with interactive pie chart**
 - **Dark mode support for better readability in low-light environments**
 - **Customizable report title and header**
+- **Multi-source directory scanning for projects with complex structures**
+- **Package specification feature for scanning specific packages**
 
 ## 📷 Screenshots
 
@@ -97,7 +99,7 @@ Add the JitPack repository to your build file:
     <dependency>
         <groupId>com.github.vinipx</groupId>
         <artifactId>testng-doc-generator</artifactId>
-        <version>v1.1.1</version>
+        <version>v1.2.0</version>
     </dependency>
 </dependencies>
 ```
@@ -109,7 +111,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.vinipx:testng-doc-generator:v1.1.1'
+    implementation 'com.github.vinipx:testng-doc-generator:v1.2.0'
 }
 ```
 
@@ -122,14 +124,14 @@ The TestNG Documentation Generator is also available from Maven Central:
 <dependency>
     <groupId>io.vinipx</groupId>
     <artifactId>testng-doc-generator</artifactId>
-    <version>1.1.1</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
 **Gradle:**
 ```groovy
 dependencies {
-    implementation 'io.vinipx:testng-doc-generator:1.1.1'
+    implementation 'io.vinipx:testng-doc-generator:1.2.0'
 }
 ```
 
@@ -142,14 +144,14 @@ If you've built the project locally, you can use it from your local Maven reposi
 <dependency>
     <groupId>io.vinipx</groupId>
     <artifactId>testng-doc-generator</artifactId>
-    <version>1.1.1</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
 **Gradle:**
 ```groovy
 dependencies {
-    implementation 'io.vinipx:testng-doc-generator:1.1.1'
+    implementation 'io.vinipx:testng-doc-generator:1.2.0'
 }
 ```
 
@@ -177,11 +179,116 @@ public class DocumentationGenerator {
         generator.setReportTitle("My Test Suite Documentation");
         generator.setReportHeader("Generated on " + new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()));
         
-        // Generate documentation
-        generator.generateDocumentation("path/to/your/test/classes");
+        // Generate documentation from a single source directory
+        try {
+            generator.generateDocumentationFromSource("path/to/your/test/classes");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        // Or generate documentation from multiple source directories
+        try {
+            generator.generateDocumentationFromMultipleSources(
+                "path/to/your/test/classes",
+                "path/to/your/integration/test/classes",
+                "path/to/your/functional/test/classes"
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        // Or generate documentation from a specific package
+        try {
+            generator.generateDocumentationFromPackage("com.example.tests");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
 ```
+
+## 🔍 Usage
+
+### Basic Usage
+{{ ... }}
+
+### Multi-Source Directory Scanning
+
+For projects with complex directory structures or multiple test modules, you can use the multi-source directory scanning feature:
+
+```java
+// Scan multiple source directories
+TestNGDocGenerator generator = new TestNGDocGenerator();
+generator.generateDocumentationFromMultipleSources(
+    "src/test/java",
+    "src/integration-test/java",
+    "modules/api-tests/src/test/java",
+    "modules/ui-tests/src/test/java"
+);
+```
+
+This feature is particularly useful for:
+- Monorepo projects with multiple modules
+- Projects with separate test directories for different test types
+- Microservice architectures with distributed test files
+- Legacy projects with non-standard directory structures
+
+The generator will:
+1. Scan each directory for TestNG test classes
+2. Combine all discovered test classes into a single documentation set
+3. Calculate statistics across all test classes
+4. Generate a unified documentation with proper cross-linking
+
+You can also use the command-line interface:
+
+```bash
+java -jar testng-doc-generator.jar src/test/java src/integration-test/java modules/api-tests/src/test/java
+```
+
+### Combined Source Directory and Package Scanning
+
+For even more flexibility, you can combine source directory scanning with package-based scanning:
+
+```java
+// Scan both source directories and specific packages
+TestNGDocGenerator generator = new TestNGDocGenerator();
+String[] sourceDirectories = {
+    "src/test/java",
+    "src/integration-test/java"
+};
+String[] packages = {
+    "com.example.tests.api",
+    "com.example.tests.ui"
+};
+generator.generateDocumentationFromSourcesAndPackages(sourceDirectories, packages);
+```
+
+This approach is ideal for:
+- Projects with a mix of standard and non-standard directory structures
+- Situations where you want to document only specific packages within source directories
+- Microservice architectures where test packages are distributed across multiple modules
+- Projects that use both reflection-based and source-based test discovery
+
+Using the command-line interface:
+
+```bash
+java -jar testng-doc-generator.jar src/test/java src/integration-test/java --package com.example.tests.api --package com.example.tests.ui
+```
+
+### Package Specification
+
+You can also specify a package to scan for TestNG test classes:
+
+```java
+// Scan a specific package
+TestNGDocGenerator generator = new TestNGDocGenerator();
+generator.generateDocumentationFromPackage("com.example.tests");
+```
+
+This feature is particularly useful for:
+- Projects with a large number of test classes
+- Situations where you want to document only a specific package
+- Microservice architectures where test packages are distributed across multiple modules
 
 ## 🏗️ Building the Project
 
@@ -208,7 +315,7 @@ To publish the library to your local Maven repository for testing:
 Or run the JAR directly:
 
 ```bash
-java -jar build/libs/testng-doc-generator-1.1.1-all.jar <source-directory>
+java -jar build/libs/testng-doc-generator-1.2.0-all.jar <source-directory>
 ```
 
 Replace `<source-directory>` with the directory containing your TestNG test classes.
