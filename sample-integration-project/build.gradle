@@ -10,16 +10,16 @@ targetCompatibility = '11'
 
 repositories {
     mavenCentral()
-    // mavenLocal() // For local testing
+    mavenLocal() // For local testing
     maven { url 'https://jitpack.io' } // Use JitPack repository
 }
 
 dependencies {
     // Use the TestNG Documentation Generator from local Maven repository
-    // implementation 'io.vinipx:testng-doc-generator:1.2.7'
+    implementation 'io.vinipx:testng-doc-generator:1.2.9'
     
     // Alternatively, use from JitPack
-    implementation 'com.github.vinipx:testng-doc-generator:v1.2.7'
+    // implementation 'com.github.vinipx:testng-doc-generator:v1.2.9'
     
     // FreeMarker for template processing
     implementation 'org.freemarker:freemarker:2.3.32'
@@ -33,7 +33,13 @@ application {
 }
 
 test {
-    useTestNG()
+    useTestNG() {
+        suites file('src/test/resources/testng.xml')
+        outputDirectory = file("$buildDir/test-output")
+    }
+    testLogging {
+        events "PASSED", "FAILED", "SKIPPED"
+    }
 }
 
 // Add a task to run the documentation generator
@@ -45,5 +51,24 @@ tasks.register('generateDocs', JavaExec) {
     
     doFirst {
         println "Generating TestNG documentation..."
+    }
+}
+
+// Add a task to run tests and then generate documentation
+tasks.register('runTestsAndGenerateDocs') {
+    group = 'documentation'
+    description = 'Run tests and then generate documentation'
+    dependsOn test, generateDocs
+}
+
+// Add a task to generate documentation using source directories
+tasks.register('generateDocsFromSource', JavaExec) {
+    group = 'documentation'
+    description = 'Generate TestNG documentation from source directories'
+    classpath = sourceSets.main.runtimeClasspath + sourceSets.test.runtimeClasspath
+    mainClass = 'io.vinipx.sample.GenerateDocumentationFromSource'
+    
+    doFirst {
+        println "Generating TestNG documentation from source directories..."
     }
 }

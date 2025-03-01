@@ -36,6 +36,31 @@ tasks.withType(Jar) {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
+// Include templates in the JAR file
+jar {
+    from('src/main/resources') {
+        include 'templates/**'
+    }
+    
+    // Also include default templates from the code
+    doFirst {
+        // Create templates directory in resources if it doesn't exist
+        def templatesDir = file('src/main/resources/templates')
+        if (!templatesDir.exists()) {
+            templatesDir.mkdirs()
+        }
+        
+        // Copy templates from sample-integration-project if they exist
+        def sampleTemplatesDir = file('sample-integration-project/templates')
+        if (sampleTemplatesDir.exists()) {
+            copy {
+                from sampleTemplatesDir
+                into templatesDir
+            }
+        }
+    }
+}
+
 // Main application configuration
 application {
     mainClass = 'io.vinipx.testngdoc.TestNGDocGenerator'
@@ -72,7 +97,6 @@ task runUnitTests(type: Test) {
     
     // Include only the unit test classes
     include '**/TestNGDocGeneratorUnitTest.class'
-    include '**/SimpleTestNGDocGeneratorUnitTest.class'
     
     // Show test results in the console
     testLogging {
@@ -176,24 +200,7 @@ java {
 }
 
 // Configure the JAR
-jar {
-    manifest {
-        attributes(
-            'Main-Class': 'io.vinipx.testngdoc.TestNGDocGenerator',
-            'Implementation-Title': 'TestNG Documentation Generator',
-            'Implementation-Version': project.version
-        )
-    }
-    
-    // Include templates from resources directory only
-    // This ensures templates are properly included in the JAR
-    from('src/main/resources') {
-        include 'templates/**'
-    }
-    
-    // Avoid duplicate template files
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
+// Removed redundant code
 
 // Maven publication configuration for JitPack and Maven Central
 publishing {

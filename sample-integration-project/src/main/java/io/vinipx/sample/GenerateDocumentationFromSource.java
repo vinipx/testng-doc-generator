@@ -4,15 +4,14 @@ import io.vinipx.testngdoc.TestNGDocGenerator;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import freemarker.template.TemplateException;
+import java.nio.file.Paths;
 
 /**
  * Sample class demonstrating how to use the TestNG Documentation Generator library
- * with all available features.
+ * with all available features, generating documentation from source directories.
  */
-public class GenerateDocumentation {
+public class GenerateDocumentationFromSource {
     
     public static void main(String[] args) {
         // Path to the test classes
@@ -32,32 +31,25 @@ public class GenerateDocumentation {
             
             // UI features
             .useDarkMode(false)  // Set to true for dark mode
-            .displayTagsChart(true)  // Set to false to disable tags chart
+            .displayTagsChart(false)
             
             // Pattern replacements for improved readability
             .addPatternReplacement("_", " ")
             .addPatternReplacement("whenFeatureIs", "When Feature Is ")
             .addPatternReplacement("thenFeatureIs", "Then Feature Is ")
-            .addPatternReplacement("givenFeature", "Given Feature ")
-            
-            // Method filtering (optional)
-            .includeMethodPattern(".*Test$")  // Only include methods ending with "Test"
-            .includeTagPattern(".*");         // Include all tags
+            .addPatternReplacement("givenFeature", "Given Feature ");
         
         // Generate documentation
-        System.out.println("Generating TestNG documentation for: " + testClassesPath);
+        System.out.println("Generating TestNG documentation from source directory: " + testClassesPath);
         try {
-            // Use generateDocumentationFromSourcesAndPackages to ensure all test classes are found
-            generator.generateDocumentationFromSourcesAndPackages(
-                new String[]{testClassesPath}, // Source directories
-                new String[]{"com.example.tests"} // Packages to scan
-            );
+            // Use generateDocumentationFromSource method
+            generator.generateDocumentationFromSource(testClassesPath);
             
             System.out.println("Documentation generated successfully in directory: " + outputDirectory);
-            System.out.println("Documentation generation complete!");
         } catch (IOException | TemplateException e) {
             System.err.println("Error generating documentation: " + e.getMessage());
             e.printStackTrace();
         }
+        System.out.println("Documentation generation complete!");
     }
 }

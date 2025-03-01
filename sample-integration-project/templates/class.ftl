@@ -111,6 +111,21 @@
         .method-description {
             margin-top: 15px;
         }
+        .method-tags {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .tag {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
         pre {
             background-color: #f6f8fa;
             padding: 15px;
@@ -160,6 +175,13 @@
             <div class="method-description">
                 <pre>${method.description}</pre>
             </div>
+            <#if method.tags?? && method.tags?size gt 0>
+            <div class="method-tags">
+                <#list method.tags as tag>
+                <span class="tag">${tag}</span>
+                </#list>
+            </div>
+            </#if>
         </div>
         </#list>
     </div>

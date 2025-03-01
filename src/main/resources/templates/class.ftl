@@ -1,25 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>${className} - ${reportTitle}</title>
+    <title>${className} - TestNG Documentation</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/styles.css">
     <style>
         :root {
-            <#if darkMode>
-            --primary-color: #3a5a8c;
-            --secondary-color: #2c4a7c;
-            --accent-color: #4d7ab8;
-            --background-color: #1e1e1e;
-            --card-bg-color: #2d2d2d;
-            --text-color: #e0e0e0;
-            --border-color: #444444;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --error-color: #dc3545;
-            --code-bg-color: #2a2a2a;
-            <#else>
             --primary-color: #4a6da7;
             --secondary-color: #304878;
             --accent-color: #5d8fdb;
@@ -30,8 +16,6 @@
             --success-color: #28a745;
             --warning-color: #ffc107;
             --error-color: #dc3545;
-            --code-bg-color: #f6f8fa;
-            </#if>
         }
         * {
             box-sizing: border-box;
@@ -56,62 +40,65 @@
             color: white;
             padding: 20px 0;
             margin-bottom: 30px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         h1 {
-            font-size: 2.2rem;
-            margin-bottom: 10px;
             color: white;
-        }
-        .header-note {
-            font-size: 0.9rem;
-            font-style: italic;
-            color: rgba(255, 255, 255, 0.8);
-            margin-top: 5px;
+            font-size: 2.2rem;
+            font-weight: 600;
         }
         h2 {
+            color: var(--secondary-color);
             font-size: 1.8rem;
-            margin: 25px 0 15px;
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--border-color);
+            margin: 25px 0 15px 0;
             padding-bottom: 10px;
-        }
-        a {
-            color: var(--accent-color);
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
+            border-bottom: 2px solid var(--accent-color);
         }
         .nav {
-            margin-top: 10px;
+            margin-bottom: 20px;
         }
         .nav a {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: var(--primary-color);
             color: white;
-            opacity: 0.9;
-            font-size: 0.9rem;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
         }
         .nav a:hover {
-            opacity: 1;
+            background-color: var(--secondary-color);
         }
         .info-panel {
             background-color: var(--card-bg-color);
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 30px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
         .info-panel p {
-            margin-bottom: 10px;
+            margin: 10px 0;
+            font-size: 1.1rem;
+        }
+        .info-panel strong {
+            color: var(--secondary-color);
         }
         .method {
             background-color: var(--card-bg-color);
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .method:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .method-name {
             font-weight: 600;
@@ -121,32 +108,33 @@
             padding-bottom: 8px;
             border-bottom: 1px solid var(--border-color);
         }
-        .tags-container {
-            margin: 10px 0;
+        .method-description {
+            margin-top: 15px;
+        }
+        .method-tags {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
         }
         .tag {
             display: inline-block;
             background-color: var(--accent-color);
             color: white;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            margin-right: 5px;
-            margin-bottom: 5px;
-        }
-        .method-description {
-            margin-top: 15px;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            font-weight: 500;
         }
         pre {
-            background-color: var(--code-bg-color);
-            color: var(--text-color);
+            background-color: #f6f8fa;
             padding: 15px;
             border-radius: 6px;
             overflow-x: auto;
             line-height: 1.5;
             font-family: 'Consolas', 'Monaco', monospace;
             font-size: 0.9rem;
-            border: 1px solid var(--border-color);
+            border: 1px solid #e1e4e8;
         }
         @media (max-width: 768px) {
             .container {
@@ -164,13 +152,10 @@
         }
     </style>
 </head>
-<body<#if darkMode> class="dark-mode"</#if>>
+<body>
     <header>
         <div class="container">
             <h1>${className}</h1>
-            <#if reportHeader??>
-                <div class="header-note">${reportHeader}</div>
-            </#if>
             <div class="nav">
                 <a href="index.html">Back to Index</a>
             </div>
@@ -187,16 +172,16 @@
         <#list testMethods as method>
         <div class="method">
             <div class="method-name">${method.name}</div>
+            <div class="method-description">
+                <pre>${method.description}</pre>
+            </div>
             <#if method.tags?? && method.tags?size gt 0>
-            <div class="tags-container">
+            <div class="method-tags">
                 <#list method.tags as tag>
                 <span class="tag">${tag}</span>
                 </#list>
             </div>
             </#if>
-            <div class="method-description">
-                <pre>${method.description}</pre>
-            </div>
         </div>
         </#list>
     </div>
