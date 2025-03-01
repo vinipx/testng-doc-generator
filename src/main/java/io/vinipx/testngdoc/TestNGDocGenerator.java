@@ -2035,6 +2035,16 @@ public class TestNGDocGenerator {
     }
 
     /**
+     * Set the report header
+     * @param header The header to use for the report
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator setReportHeader(String header) {
+        this.reportHeader = header;
+        return this;
+    }
+
+    /**
      * Enable or disable the display of the tags chart
      * @param enabled Whether the tags chart should be displayed
      * @return This TestNGDocGenerator instance for method chaining
