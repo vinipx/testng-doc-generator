@@ -272,14 +272,24 @@ public class TestNGDocGenerator {
     private Configuration initializeFreemarker() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_32);
         
-        // Create template directory if it doesn't exist
+        // First try to use templates from the file system
         Path templatePath = Paths.get(TEMPLATE_DIR);
         if (!Files.exists(templatePath)) {
-            Files.createDirectories(templatePath);
-            createDefaultTemplates(templatePath);
+            try {
+                Files.createDirectories(templatePath);
+                createDefaultTemplates(templatePath);
+                cfg.setDirectoryForTemplateLoading(new File(TEMPLATE_DIR));
+            } catch (IOException e) {
+                System.out.println("Could not create template directory, using classpath resources instead");
+                // If we can't create the template directory (e.g., when used as a dependency),
+                // use classpath resources instead
+                cfg.setClassLoaderForTemplateLoading(getClass().getClassLoader(), "templates");
+            }
+        } else {
+            // Template directory exists, use it
+            cfg.setDirectoryForTemplateLoading(new File(TEMPLATE_DIR));
         }
         
-        cfg.setDirectoryForTemplateLoading(new File(TEMPLATE_DIR));
         cfg.setDefaultEncoding("UTF-8");
         return cfg;
     }
@@ -908,6 +918,97 @@ public class TestNGDocGenerator {
     }
     
     /**
+     * Extract tags from the @Docs annotation on a method using reflection
+     * @param method The method to check for annotations
+     * @param methodInfo The TestMethodInfo to update with tags
+     */
+    private void extractTagsFromMethod(Method method, TestMethodInfo methodInfo) {
+        try {
+            // Try to get the annotation by name to handle cases where the class might not be available
+            java.lang.annotation.Annotation[] annotations = method.getAnnotations();
+            for (java.lang.annotation.Annotation annotation : annotations) {
+                String annotationName = annotation.annotationType().getName();
+                
+                // Check if this is our Docs annotation
+                if (annotationName.equals("io.vinipx.testngdoc.annotations.Docs")) {
+                    // Use reflection to get the tags value
+                    try {
+                        Method tagsMethod = annotation.annotationType().getMethod("tags");
+                        String[] tags = (String[]) tagsMethod.invoke(annotation);
+                        
+                        // Add each tag to the method info
+                        for (String tag : tags) {
+                            methodInfo.addTag(tag);
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Error extracting tags from annotation: " + e.getMessage());
+                    }
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error extracting tags from method " + method.getName() + ": " + e.getMessage());
+        }
+    }
+
+    private class TestMethodVisitor extends VoidVisitorAdapter<Void> {
+        private final String packageName;
+        private final String className;
+        private final List<TestMethodInfo> testMethods;
+
+        public TestMethodVisitor(String packageName, String className, List<TestMethodInfo> testMethods) {
+            this.packageName = packageName;
+            this.className = className;
+            this.testMethods = testMethods;
+        }
+
+        @Override
+        public void visit(MethodDeclaration n, Void arg) {
+            // Only process methods with TestNG annotations
+            if (n.getAnnotations() != null && n.getAnnotations().stream()
+                    .anyMatch(a -> a.getNameAsString().equals("Test") || 
+                               a.getNameAsString().equals("org.testng.annotations.Test"))) {
+                
+                // Initialize test method info
+                TestMethodInfo methodInfo = new TestMethodInfo();
+                String methodName = n.getNameAsString();
+                methodInfo.setName(methodName);
+                
+                // Check for documentation tags in @Docs annotation
+                n.getAnnotations().stream()
+                    .filter(a -> a.getNameAsString().equals("Docs") || 
+                                a.getNameAsString().equals("io.vinipx.testngdoc.annotations.Docs"))
+                    .findFirst()
+                    .ifPresent(docsAnnotation -> {
+                        docsAnnotation.getChildNodes().stream()
+                            .filter(node -> node instanceof MemberValuePair)
+                            .map(node -> (MemberValuePair) node)
+                            .filter(pair -> pair.getNameAsString().equals("tags"))
+                            .findFirst()
+                            .ifPresent(tagsPair -> {
+                                if (tagsPair.getValue() instanceof ArrayInitializerExpr) {
+                                    ArrayInitializerExpr arrayExpr = (ArrayInitializerExpr) tagsPair.getValue();
+                                    arrayExpr.getValues().stream()
+                                        .filter(value -> value instanceof StringLiteralExpr)
+                                        .map(value -> ((StringLiteralExpr) value).getValue())
+                                        .forEach(methodInfo::addTag);
+                                }
+                            });
+                    });
+                
+                // Get method body to extract JavaDoc comment and method body
+                if (n.getBody().isPresent()) {
+                    String methodBody = n.getBody().get().toString();
+                    methodInfo.setDescription(generateHumanReadableExplanation(methodBody, methodName));
+                }
+                
+                testMethods.add(methodInfo);
+            }
+            super.visit(n, arg);
+        }
+    }
+
+    /**
      * Generates a human-readable explanation of the test method logic
      * @param rawCode The raw code of the test method
      * @param methodName The name of the test method
@@ -1054,85 +1155,77 @@ public class TestNGDocGenerator {
         return "the test condition is validated";
     }
 
-    private class TestMethodVisitor extends VoidVisitorAdapter<Void> {
-        private final String packageName;
-        private final String className;
-        private final List<TestMethodInfo> testMethods;
-
-        public TestMethodVisitor(String packageName, String className, List<TestMethodInfo> testMethods) {
-            this.packageName = packageName;
-            this.className = className;
-            this.testMethods = testMethods;
-        }
-
-        @Override
-        public void visit(MethodDeclaration n, Void arg) {
-            // Only process methods with TestNG annotations
-            if (n.getAnnotations() != null && n.getAnnotations().stream()
-                    .anyMatch(a -> a.getNameAsString().equals("Test") || 
-                               a.getNameAsString().equals("org.testng.annotations.Test"))) {
-                
-                // Initialize test method info
-                TestMethodInfo methodInfo = new TestMethodInfo();
-                String methodName = n.getNameAsString();
-                methodInfo.setName(methodName);
-                
-                // Check for documentation tags in @Docs annotation
-                n.getAnnotations().stream()
-                    .filter(a -> a.getNameAsString().equals("Docs") || 
-                                a.getNameAsString().equals("io.vinipx.testngdoc.annotations.Docs"))
-                    .findFirst()
-                    .ifPresent(docsAnnotation -> {
-                        docsAnnotation.getChildNodes().stream()
-                            .filter(node -> node instanceof MemberValuePair)
-                            .map(node -> (MemberValuePair) node)
-                            .filter(pair -> pair.getNameAsString().equals("tags"))
-                            .findFirst()
-                            .ifPresent(tagsPair -> {
-                                if (tagsPair.getValue() instanceof ArrayInitializerExpr) {
-                                    ArrayInitializerExpr arrayExpr = (ArrayInitializerExpr) tagsPair.getValue();
-                                    arrayExpr.getValues().stream()
-                                        .filter(value -> value instanceof StringLiteralExpr)
-                                        .map(value -> ((StringLiteralExpr) value).getValue())
-                                        .forEach(methodInfo::addTag);
-                                }
-                            });
-                    });
-                
-                // Get method body to extract JavaDoc comment and method body
-                if (n.getBody().isPresent()) {
-                    String methodBody = n.getBody().get().toString();
-                    methodInfo.setDescription(generateHumanReadableExplanation(methodBody, methodName));
-                }
-                
-                testMethods.add(methodInfo);
+    private void generateClassDocumentation(List<TestClassInfo> testClasses, Configuration cfg) 
+            throws IOException, TemplateException {
+        Template template = cfg.getTemplate("class.ftl");
+        
+        for (TestClassInfo testClass : testClasses) {
+            Map<String, Object> dataModel = new HashMap<>();
+            dataModel.put("className", testClass.getClassName());
+            dataModel.put("packageName", testClass.getPackageName());
+            dataModel.put("testMethods", testClass.getTestMethods());
+            dataModel.put("percentage", testClass.getPercentage());
+            dataModel.put("darkMode", darkMode);
+            dataModel.put("reportTitle", reportTitle);
+            dataModel.put("reportHeader", reportHeader);
+            
+            try (Writer out = new FileWriter(new File(OUTPUT_DIR, testClass.getClassName() + ".html"))) {
+                template.process(dataModel, out);
             }
-            super.visit(n, arg);
         }
     }
 
-    /**
-     * Extract tags from the @Docs annotation on a method using reflection
-     * @param method The method to check for annotations
-     * @param methodInfo The TestMethodInfo to update with tags
-     */
-    private void extractTagsFromMethod(Method method, TestMethodInfo methodInfo) {
-        try {
-            // Check for io.vinipx.testngdoc.annotations.Docs annotation
-            if (method.isAnnotationPresent(io.vinipx.testngdoc.annotations.Docs.class)) {
-                io.vinipx.testngdoc.annotations.Docs docsAnnotation = 
-                    method.getAnnotation(io.vinipx.testngdoc.annotations.Docs.class);
-                
-                // Add each tag to the method info
-                for (String tag : docsAnnotation.tags()) {
-                    methodInfo.addTag(tag);
+    private void generateIndexPage(List<TestClassInfo> testClasses, Configuration cfg) 
+            throws IOException, TemplateException {
+        Template template = cfg.getTemplate("index.ftl");
+        
+        Map<String, Object> dataModel = new HashMap<>();
+        dataModel.put("testClasses", testClasses);
+        int totalMethods = testClasses.stream()
+                .mapToInt(tc -> tc.getTestMethods().size())
+                .sum();
+        dataModel.put("totalMethods", totalMethods);
+        dataModel.put("displayTagsChart", displayTagsChart);
+        dataModel.put("darkMode", darkMode);
+        dataModel.put("reportTitle", reportTitle);
+        dataModel.put("reportHeader", reportHeader);
+        
+        // Only collect tag statistics if the chart is enabled
+        if (displayTagsChart) {
+            // Collect tag statistics
+            Map<String, Integer> tagStats = new HashMap<>();
+            
+            for (TestClassInfo testClass : testClasses) {
+                for (TestMethodInfo method : testClass.getTestMethods()) {
+                    for (String tag : method.getTags()) {
+                        // Group similar tags by their prefix (e.g., "Feature: X" and "Feature: Y" are grouped as "Feature")
+                        String tagCategory = tag;
+                        if (tag.contains(":")) {
+                            tagCategory = tag.substring(0, tag.indexOf(":")).trim();
+                        }
+                        
+                        tagStats.put(tagCategory, tagStats.getOrDefault(tagCategory, 0) + 1);
+                    }
                 }
             }
-        } catch (Exception e) {
-            System.err.println("Error extracting tags from method " + method.getName() + ": " + e.getMessage());
+            
+            // Add tag statistics to the data model
+            dataModel.put("tagStats", tagStats);
+            
+            // Calculate percentages for each tag category
+            Map<String, Double> tagPercentages = new HashMap<>();
+            for (Map.Entry<String, Integer> entry : tagStats.entrySet()) {
+                double percentage = (double) entry.getValue() / totalMethods * 100;
+                tagPercentages.put(entry.getKey(), Math.round(percentage * 10) / 10.0); // Round to 1 decimal place
+            }
+            dataModel.put("tagPercentages", tagPercentages);
+        }
+        
+        try (Writer out = new FileWriter(new File(OUTPUT_DIR, "index.html"))) {
+            template.process(dataModel, out);
         }
     }
-    
+
     /**
      * Set a custom pattern replacement map for improving readability of test documentation.
      * Keys in the map represent patterns to find, and values represent their replacements.
@@ -1237,77 +1330,6 @@ public class TestNGDocGenerator {
     public TestNGDocGenerator setReportHeader(String header) {
         this.reportHeader = header;
         return this;
-    }
-
-    private void generateClassDocumentation(List<TestClassInfo> testClasses, Configuration cfg) 
-            throws IOException, TemplateException {
-        Template template = cfg.getTemplate("class.ftl");
-        
-        for (TestClassInfo testClass : testClasses) {
-            Map<String, Object> dataModel = new HashMap<>();
-            dataModel.put("className", testClass.getClassName());
-            dataModel.put("packageName", testClass.getPackageName());
-            dataModel.put("testMethods", testClass.getTestMethods());
-            dataModel.put("percentage", testClass.getPercentage());
-            dataModel.put("darkMode", darkMode);
-            dataModel.put("reportTitle", reportTitle);
-            dataModel.put("reportHeader", reportHeader);
-            
-            try (Writer out = new FileWriter(new File(OUTPUT_DIR, testClass.getClassName() + ".html"))) {
-                template.process(dataModel, out);
-            }
-        }
-    }
-
-    private void generateIndexPage(List<TestClassInfo> testClasses, Configuration cfg) 
-            throws IOException, TemplateException {
-        Template template = cfg.getTemplate("index.ftl");
-        
-        Map<String, Object> dataModel = new HashMap<>();
-        dataModel.put("testClasses", testClasses);
-        int totalMethods = testClasses.stream()
-                .mapToInt(tc -> tc.getTestMethods().size())
-                .sum();
-        dataModel.put("totalMethods", totalMethods);
-        dataModel.put("displayTagsChart", displayTagsChart);
-        dataModel.put("darkMode", darkMode);
-        dataModel.put("reportTitle", reportTitle);
-        dataModel.put("reportHeader", reportHeader);
-        
-        // Only collect tag statistics if the chart is enabled
-        if (displayTagsChart) {
-            // Collect tag statistics
-            Map<String, Integer> tagStats = new HashMap<>();
-            
-            for (TestClassInfo testClass : testClasses) {
-                for (TestMethodInfo method : testClass.getTestMethods()) {
-                    for (String tag : method.getTags()) {
-                        // Group similar tags by their prefix (e.g., "Feature: X" and "Feature: Y" are grouped as "Feature")
-                        String tagCategory = tag;
-                        if (tag.contains(":")) {
-                            tagCategory = tag.substring(0, tag.indexOf(":")).trim();
-                        }
-                        
-                        tagStats.put(tagCategory, tagStats.getOrDefault(tagCategory, 0) + 1);
-                    }
-                }
-            }
-            
-            // Add tag statistics to the data model
-            dataModel.put("tagStats", tagStats);
-            
-            // Calculate percentages for each tag category
-            Map<String, Double> tagPercentages = new HashMap<>();
-            for (Map.Entry<String, Integer> entry : tagStats.entrySet()) {
-                double percentage = (double) entry.getValue() / totalMethods * 100;
-                tagPercentages.put(entry.getKey(), Math.round(percentage * 10) / 10.0); // Round to 1 decimal place
-            }
-            dataModel.put("tagPercentages", tagPercentages);
-        }
-        
-        try (Writer out = new FileWriter(new File(OUTPUT_DIR, "index.html"))) {
-            template.process(dataModel, out);
-        }
     }
 
     // Inner classes for storing test information
