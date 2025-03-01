@@ -111,7 +111,7 @@ Add the JitPack repository to your build file:
     <dependency>
         <groupId>com.github.vinipx</groupId>
         <artifactId>testng-doc-generator</artifactId>
-        <version>v1.2.5</version>
+        <version>v1.2.6</version>
     </dependency>
 </dependencies>
 ```
@@ -123,7 +123,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.vinipx:testng-doc-generator:v1.2.5'
+    implementation 'com.github.vinipx:testng-doc-generator:v1.2.6'
 }
 ```
 
@@ -136,14 +136,14 @@ The TestNG Documentation Generator is also available from Maven Central:
 <dependency>
     <groupId>io.vinipx</groupId>
     <artifactId>testng-doc-generator</artifactId>
-    <version>1.2.5</version>
+    <version>1.2.6</version>
 </dependency>
 ```
 
 **Gradle:**
 ```groovy
 dependencies {
-    implementation 'io.vinipx:testng-doc-generator:1.2.5'
+    implementation 'io.vinipx:testng-doc-generator:1.2.6'
 }
 ```
 
@@ -156,14 +156,14 @@ If you've built the project locally, you can use it from your local Maven reposi
 <dependency>
     <groupId>io.vinipx</groupId>
     <artifactId>testng-doc-generator</artifactId>
-    <version>1.2.5</version>
+    <version>1.2.6</version>
 </dependency>
 ```
 
 **Gradle:**
 ```groovy
 dependencies {
-    implementation 'io.vinipx:testng-doc-generator:1.2.5'
+    implementation 'io.vinipx:testng-doc-generator:1.2.6'
 }
 ```
 
@@ -447,7 +447,7 @@ To publish the library to your local Maven repository for testing:
 Or run the JAR directly:
 
 ```bash
-java -jar build/libs/testng-doc-generator-1.2.5-all.jar <source-directory>
+java -jar build/libs/testng-doc-generator-1.2.6-all.jar <source-directory>
 ```
 
 Replace `<source-directory>` with the directory containing your TestNG test classes.
