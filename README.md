@@ -315,7 +315,7 @@ To publish the library to your local Maven repository for testing:
 Or run the JAR directly:
 
 ```bash
-java -jar build/libs/testng-doc-generator-1.2.0-all.jar <source-directory>
+java -jar build/libs/testng-doc-generator-1.2.1-all.jar <source-directory>
 ```
 
 Replace `<source-directory>` with the directory containing your TestNG test classes.
