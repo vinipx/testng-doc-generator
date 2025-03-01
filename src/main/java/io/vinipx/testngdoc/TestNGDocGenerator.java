@@ -28,6 +28,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.io.FileOutputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Files;
@@ -2021,5 +2022,83 @@ public class TestNGDocGenerator {
                 }
             }
         }
+    }
+
+    /**
+     * Set the report title
+     * @param title The title to use for the report
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator setReportTitle(String title) {
+        this.reportTitle = title;
+        return this;
+    }
+
+    /**
+     * Enable or disable the display of the tags chart
+     * @param enabled Whether the tags chart should be displayed
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator displayTagsChart(boolean enabled) {
+        this.displayTagsChart = enabled;
+        return this;
+    }
+    
+    /**
+     * Enable the display of the tags chart
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator displayTagsChart() {
+        return displayTagsChart(true);
+    }
+
+    /**
+     * Add a method pattern to include in the documentation
+     * @param pattern The pattern to include
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator includeMethodPattern(String pattern) {
+        this.includeMethodPatterns.add(pattern);
+        return this;
+    }
+
+    /**
+     * Add a method pattern to exclude from the documentation
+     * @param pattern The pattern to exclude
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator excludeMethodPattern(String pattern) {
+        this.excludeMethodPatterns.add(pattern);
+        return this;
+    }
+
+    /**
+     * Add a tag pattern to include in the documentation
+     * @param pattern The pattern to include
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator includeTagPattern(String pattern) {
+        this.includeTagPatterns.add(pattern);
+        return this;
+    }
+
+    /**
+     * Add a tag pattern to exclude from the documentation
+     * @param pattern The pattern to exclude
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator excludeTagPattern(String pattern) {
+        this.excludeTagPatterns.add(pattern);
+        return this;
+    }
+
+    /**
+     * Set the output directory for the documentation
+     * @param outputDir The output directory to use
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator setOutputDirectory(String outputDir) {
+        this.OUTPUT_DIR = outputDir;
+        return this;
     }
 }
