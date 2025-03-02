@@ -46,21 +46,11 @@ public class GenerateDocumentation {
         
         // Generate documentation
         System.out.println("Generating TestNG documentation for: " + testClassesPath);
-        try {
-            // Ensure templates exist before generating documentation
-            generator.ensureTemplateFilesExist();
-            
-            // Use generateDocumentationFromSourcesAndPackages to ensure all test classes are found
-            generator.generateDocumentationFromSourcesAndPackages(
-                new String[]{testClassesPath}, // Source directories
-                new String[]{"com.example.tests"} // Packages to scan
-            );
-            
-            System.out.println("Documentation generated successfully in directory: " + outputDirectory);
-            System.out.println("Documentation generation complete!");
-        } catch (IOException | TemplateException e) {
-            System.err.println("Error generating documentation: " + e.getMessage());
-            e.printStackTrace();
-        }
+
+        // Use generateDocumentationFromSourcesAndPackages to ensure all test classes are found
+        generator.generateDocs(outputDirectory, "src/test/java");
+
+        System.out.println("Documentation generated successfully in directory: " + outputDirectory);
+        System.out.println("Documentation generation complete!");
     }
 }

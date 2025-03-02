@@ -23,7 +23,7 @@ public class SampleIntegrationTest {
     }
     
     @Test
-    @Docs(tags = {"feature-toggle", "positive-test", "gherkin-style"})
+    @Docs(tags = {"feature:toggle", "positive:test", "gherkin:style"})
     public void givenFeatureEnabled_whenFeatureIsAccessed_thenFeatureWorksCorrectlyTest() {
         // This test demonstrates a Gherkin-style test method name
         // The documentation generator will format this nicely
@@ -39,7 +39,7 @@ public class SampleIntegrationTest {
     }
     
     @Test
-    @Docs(tags = {"feature-toggle", "negative-test"})
+    @Docs(tags = {"feature:toggle", "negative-test"})
     public void whenFeatureIsDisabled_thenFeatureIsNotAccessibleTest() {
         // Disable the feature
         featureEnabled = false;

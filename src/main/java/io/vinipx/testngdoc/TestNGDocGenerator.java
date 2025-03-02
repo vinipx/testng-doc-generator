@@ -1500,6 +1500,144 @@ public class TestNGDocGenerator {
         return valid;
     }
 
+    /**
+     * Collects tags from all test methods and aggregates them for reporting
+     *
+     * @param testClasses The list of test classes to process
+     * @return A map of tag names to their occurrence count
+     */
+    private Map<String, Integer> collectAllTags(List<TestClassInfo> testClasses) {
+        Map<String, Integer> tagCounts = new HashMap<>();
+
+        // Iterate through all classes and their methods to collect tags
+        for (TestClassInfo classData : testClasses) {
+            for (TestMethodInfo methodData : classData.getTestMethods()) {
+                if (methodData.getTags() != null) {
+                    for (String tag : methodData.getTags()) {
+                        // For tags in format "category:value", extract just the category
+                        String tagKey = tag;
+                        if (tag.contains(":")) {
+                            tagKey = tag.split(":")[0];
+                        }
+
+                        // Update tag count
+                        tagCounts.put(tagKey, tagCounts.getOrDefault(tagKey, 0) + 1);
+                    }
+                }
+            }
+        }
+
+        return tagCounts;
+    }
+
+    /**
+     * Generates documentation for all test classes in the specified package or path
+     *
+     * @param outputDir The output directory for documentation
+     * @param packageOrPath The package name or source directory path to scan for test classes
+     */
+    public void generateDocs(String outputDir, String packageOrPath) {
+        try {
+            // Set output directory
+            OUTPUT_DIR = outputDir;
+
+            // Create output directory if it doesn't exist
+            File outputDirectory = new File(outputDir);
+            if (!outputDirectory.exists()) {
+                outputDirectory.mkdirs();
+            }
+
+            // Initialize FreeMarker
+            Configuration cfg = initializeFreemarker();
+            removeChartJsReferences();
+
+            // Determine if packageOrPath is a package name or a file path
+            List<TestClassInfo> testClasses;
+            File path = new File(packageOrPath);
+
+            if (path.exists() && path.isDirectory()) {
+                // It's a file path
+                System.out.println("Scanning directory: " + packageOrPath);
+                testClasses = scanForTestClassesFromSource(packageOrPath);
+            } else {
+                // Assume it's a package name
+                System.out.println("Scanning package: " + packageOrPath);
+                testClasses = scanForTestClasses(packageOrPath);
+            }
+
+            // Collect all tags for aggregated display
+            Map<String, Integer> allTags = collectAllTags(testClasses);
+
+            // Calculate total test methods
+            int totalMethods = testClasses.stream()
+                    .mapToInt(classInfo -> classInfo.getTestMethods().size())
+                    .sum();
+
+            // Create the data model for the index page
+            Map<String, Object> indexModel = new HashMap<>();
+            indexModel.put("testClasses", testClasses);
+            indexModel.put("tagCounts", allTags);
+            indexModel.put("reportTitle", reportTitle);
+            indexModel.put("reportHeader", reportHeader);
+            indexModel.put("darkMode", darkMode);
+            indexModel.put("displayTagsChart", displayTagsChart);
+            indexModel.put("totalMethods", totalMethods);
+
+            // Generate SVG chart for tags if enabled
+            if (displayTagsChart && !allTags.isEmpty()) {
+                // Calculate percentages for tag chart
+                Map<String, Double> tagPercentages = new HashMap<>();
+                for (Map.Entry<String, Integer> entry : allTags.entrySet()) {
+                    double percentage = (double) entry.getValue() / totalMethods * 100;
+                    tagPercentages.put(entry.getKey(), Math.round(percentage * 10) / 10.0); // Round to 1 decimal place
+                }
+
+                // Generate the SVG chart and add it to the model
+                String svgChart = generateSvgPieChart(allTags, tagPercentages);
+                indexModel.put("svgChart", svgChart);
+            }
+
+            // Generate index page
+            generatePage("index", indexModel, outputDir + "/index.html");
+
+            // Generate individual class pages
+            generateClassDocumentation(testClasses, cfg);
+
+            System.out.println("Documentation generated in: " + outputDir);
+        } catch (Exception e) {
+            System.err.println("Error generating documentation: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Helper method to generate a page using a FreeMarker template
+     *
+     * @param templateName Name of the template to use
+     * @param model Data model to populate the template
+     * @param outputFile Path to the output file
+     * @throws IOException If an I/O error occurs
+     * @throws TemplateException If a template error occurs
+     */
+    private void generatePage(String templateName, Map<String, Object> model, String outputFile)
+            throws IOException, TemplateException {
+        // Initialize FreeMarker configuration
+        Configuration cfg = initializeFreemarker();
+
+        // Get the template
+        Template template = cfg.getTemplate(templateName + ".ftl");
+
+        // Create output directory if it doesn't exist
+        File outputFileObj = new File(outputFile);
+        outputFileObj.getParentFile().mkdirs();
+
+        // Create writer for output file
+        try (Writer out = new FileWriter(outputFile)) {
+            // Process template with model data
+            template.process(model, out);
+        }
+    }
+
     private void generateClassDocumentation(List<TestClassInfo> testClasses, Configuration cfg)
             throws IOException, TemplateException {
         Template template = cfg.getTemplate("class.ftl");
