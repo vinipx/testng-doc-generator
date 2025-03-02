@@ -1954,10 +1954,22 @@ public class TestNGDocGenerator {
      * @return This TestNGDocGenerator instance for method chaining
      */
     public TestNGDocGenerator ensureTemplateFilesExist() {
+        // Only create templates in the output directory by default
+        ensureTemplateFilesExistInDirectory(new File(OUTPUT_DIR, "templates"));
+        
+        return this;
+    }
+    
+    /**
+     * Ensures that template files exist in both the main template directory and output directory
+     * This is mainly used for development and testing purposes
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator ensureAllTemplateFilesExist() {
         // Create templates in the main template directory
         ensureTemplateFilesExistInDirectory(new File(TEMPLATE_DIR));
         
-        // Also create templates in the output directory for backward compatibility
+        // Also create templates in the output directory
         ensureTemplateFilesExistInDirectory(new File(OUTPUT_DIR, "templates"));
         
         return this;
