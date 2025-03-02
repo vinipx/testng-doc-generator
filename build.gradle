@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'io.vinipx'
-version = '1.3.3'
+version = '1.3.4'
 sourceCompatibility = '11'
 targetCompatibility = '11'
 
@@ -36,29 +36,18 @@ tasks.withType(Jar) {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
-// Include templates in the JAR file
+// Make sure resources are included in the JAR
 jar {
     from('src/main/resources') {
-        include 'templates/**'
+        include '**/*'
     }
-    
-    // Also include default templates from the code
-    doFirst {
-        // Create templates directory in resources if it doesn't exist
-        def templatesDir = file('src/main/resources/templates')
-        if (!templatesDir.exists()) {
-            templatesDir.mkdirs()
-        }
-        
-        // Copy templates from sample-integration-project if they exist
-        def sampleTemplatesDir = file('sample-integration-project/templates')
-        if (sampleTemplatesDir.exists()) {
-            copy {
-                from sampleTemplatesDir
-                into templatesDir
-            }
-        }
+    manifest {
+        attributes(
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version
+        )
     }
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 // Main application configuration
@@ -198,9 +187,6 @@ java {
     withJavadocJar()  // Generate Javadoc JAR
     withSourcesJar()  // Generate Sources JAR
 }
-
-// Configure the JAR
-// Removed redundant code
 
 // Maven publication configuration for JitPack and Maven Central
 publishing {

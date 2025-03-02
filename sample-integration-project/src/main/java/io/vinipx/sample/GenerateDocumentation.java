@@ -47,6 +47,9 @@ public class GenerateDocumentation {
         // Generate documentation
         System.out.println("Generating TestNG documentation for: " + testClassesPath);
         try {
+            // Ensure templates exist before generating documentation
+            generator.ensureTemplateFilesExist();
+            
             // Use generateDocumentationFromSourcesAndPackages to ensure all test classes are found
             generator.generateDocumentationFromSourcesAndPackages(
                 new String[]{testClassesPath}, // Source directories

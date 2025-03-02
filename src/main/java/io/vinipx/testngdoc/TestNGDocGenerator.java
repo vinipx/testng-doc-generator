@@ -285,7 +285,29 @@ public class TestNGDocGenerator {
     private Configuration initializeFreemarker() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_32);
         
-        // First try to use templates from the classpath resources (highest priority)
+        // First check if templates exist in the template directory (TEMPLATE_DIR)
+        Path templatePath = Paths.get(TEMPLATE_DIR);
+        if (Files.exists(templatePath) && 
+            Files.exists(templatePath.resolve("class.ftl")) && 
+            Files.exists(templatePath.resolve("index.ftl"))) {
+            // Template directory exists with required templates, use it
+            cfg.setDirectoryForTemplateLoading(new File(TEMPLATE_DIR));
+            System.out.println("Using templates from directory: " + templatePath.toAbsolutePath());
+            return cfg;
+        }
+        
+        // Then check for templates in the output directory
+        Path outputTemplatePath = Paths.get(OUTPUT_DIR, "templates");
+        if (Files.exists(outputTemplatePath) && 
+            Files.exists(outputTemplatePath.resolve("class.ftl")) && 
+            Files.exists(outputTemplatePath.resolve("index.ftl"))) {
+            // Template directory exists in output directory with required templates, use it
+            cfg.setDirectoryForTemplateLoading(outputTemplatePath.toFile());
+            System.out.println("Using templates from output directory: " + outputTemplatePath.toAbsolutePath());
+            return cfg;
+        }
+        
+        // Then try to use templates from the classpath resources
         try {
             // Check if templates exist in classpath resources
             InputStream classTemplateStream = getClass().getClassLoader().getResourceAsStream("templates/class.ftl");
@@ -295,33 +317,12 @@ public class TestNGDocGenerator {
                 // Templates exist in classpath, use them
                 classTemplateStream.close();
                 indexTemplateStream.close();
-                cfg.setClassLoaderForTemplateLoading(getClass().getClassLoader(), "templates");
+                cfg.setClassLoaderForTemplateLoading(getClass().getClassLoader(), "");
                 System.out.println("Using templates from classpath resources");
                 return cfg;
             }
         } catch (Exception e) {
             System.out.println("Could not load templates from classpath: " + e.getMessage());
-        }
-        
-        // If not found in classpath, try to use templates from the file system
-        // Check both the output directory's templates folder and the current directory's templates folder
-        
-        // First check the specified template directory (TEMPLATE_DIR)
-        Path templatePath = Paths.get(TEMPLATE_DIR);
-        if (Files.exists(templatePath)) {
-            // Template directory exists, use it
-            cfg.setDirectoryForTemplateLoading(new File(TEMPLATE_DIR));
-            System.out.println("Using templates from directory: " + templatePath.toAbsolutePath());
-            return cfg;
-        }
-        
-        // Then check for templates in the output directory
-        Path outputTemplatePath = Paths.get(OUTPUT_DIR, "templates");
-        if (Files.exists(outputTemplatePath)) {
-            // Template directory exists in output directory, use it
-            cfg.setDirectoryForTemplateLoading(outputTemplatePath.toFile());
-            System.out.println("Using templates from output directory: " + outputTemplatePath.toAbsolutePath());
-            return cfg;
         }
         
         // If no templates found, create them in both locations
@@ -345,8 +346,8 @@ public class TestNGDocGenerator {
         } catch (IOException e) {
             System.out.println("Could not create template directories: " + e.getMessage());
             // Last resort: use classpath resources with default templates
-            cfg.setClassLoaderForTemplateLoading(getClass().getClassLoader(), "templates");
-            System.out.println("Using default templates from classpath resources");
+            cfg.setClassLoaderForTemplateLoading(getClass().getClassLoader(), "");
+            System.out.println("Using default templates from classpath as last resort");
         }
         
         cfg.setDefaultEncoding("UTF-8");
@@ -1295,11 +1296,6 @@ public class TestNGDocGenerator {
         return "the test condition is validated";
     }
 
-    /**
-     * Validates that the templates contain all required variables
-     * @param cfg The FreeMarker configuration
-     * @throws IOException If template loading fails
-     */
     private void validateTemplates(Configuration cfg) throws IOException {
         try {
             // Get the templates
@@ -1971,57 +1967,306 @@ public class TestNGDocGenerator {
 
     /**
      * Ensures that template files exist, creating them from classpath resources if they don't
+     * @return This TestNGDocGenerator instance for method chaining
      */
-    private void ensureTemplateFilesExist() {
+    public TestNGDocGenerator ensureTemplateFilesExist() {
         // Create templates in the main template directory
         ensureTemplateFilesExistInDirectory(new File(TEMPLATE_DIR));
         
         // Also create templates in the output directory for backward compatibility
         ensureTemplateFilesExistInDirectory(new File(OUTPUT_DIR, "templates"));
+        
+        return this;
     }
     
     /**
      * Ensures that template files exist in the specified directory, creating them from classpath resources if they don't
+     * @param templateDir The directory to ensure templates exist in
+     * @return This TestNGDocGenerator instance for method chaining
      */
-    private void ensureTemplateFilesExistInDirectory(File templateDir) {
+    public TestNGDocGenerator ensureTemplateFilesExistInDirectory(File templateDir) {
         if (!templateDir.exists()) {
-            System.out.println("Template directory does not exist. Creating: " + templateDir.getAbsolutePath());
-            boolean created = templateDir.mkdirs();
-            if (!created) {
-                System.err.println("Failed to create template directory: " + templateDir.getAbsolutePath());
-                return;
-            }
+            templateDir.mkdirs();
         }
         
-        // List of template files to check/create
-        String[] templateFiles = {"index.ftl", "class.ftl"};
+        // Template files to ensure exist
+        String[] templateFiles = {"class.ftl", "index.ftl"};
         
         for (String templateFile : templateFiles) {
             File file = new File(templateDir, templateFile);
-            
             if (!file.exists()) {
                 System.out.println("Template file does not exist. Creating: " + file.getAbsolutePath());
                 
-                try (InputStream is = getClass().getResourceAsStream("/templates/" + templateFile);
-                     FileOutputStream fos = new FileOutputStream(file)) {
+                try {
+                    // First try to load from direct classpath resources
+                    InputStream is = getClass().getClassLoader().getResourceAsStream("templates/" + templateFile);
+                    
+                    // If not found, try with different paths
+                    if (is == null) {
+                        is = getClass().getResourceAsStream("/templates/" + templateFile);
+                    }
+                    
+                    // If still not found, try without templates/ prefix (for flat classpath structure)
+                    if (is == null) {
+                        is = getClass().getClassLoader().getResourceAsStream(templateFile);
+                    }
+                    
+                    // If still not found, try with absolute path
+                    if (is == null) {
+                        is = getClass().getResourceAsStream("/" + templateFile);
+                    }
                     
                     if (is == null) {
-                        System.err.println("Could not find template resource: /templates/" + templateFile);
+                        System.err.println("Could not find template resource: " + templateFile + " in any location");
+                        // Create default template content based on template name
+                        if (templateFile.equals("class.ftl")) {
+                            createDefaultClassTemplate(file);
+                        } else if (templateFile.equals("index.ftl")) {
+                            createDefaultIndexTemplate(file);
+                        }
                         continue;
                     }
                     
-                    byte[] buffer = new byte[1024];
-                    int bytesRead;
-                    while ((bytesRead = is.read(buffer)) != -1) {
-                        fos.write(buffer, 0, bytesRead);
+                    try (FileOutputStream fos = new FileOutputStream(file)) {
+                        byte[] buffer = new byte[1024];
+                        int bytesRead;
+                        while ((bytesRead = is.read(buffer)) != -1) {
+                            fos.write(buffer, 0, bytesRead);
+                        }
+                        
+                        System.out.println("Created template file: " + file.getAbsolutePath());
+                    } finally {
+                        is.close();
                     }
-                    
-                    System.out.println("Created template file: " + file.getAbsolutePath());
                 } catch (IOException e) {
                     System.err.println("Error creating template file: " + file.getAbsolutePath() + " - " + e.getMessage());
+                    // Create default template as fallback
+                    try {
+                        if (templateFile.equals("class.ftl")) {
+                            createDefaultClassTemplate(file);
+                        } else if (templateFile.equals("index.ftl")) {
+                            createDefaultIndexTemplate(file);
+                        }
+                    } catch (IOException ex) {
+                        System.err.println("Failed to create default template: " + ex.getMessage());
+                    }
                 }
+            } else {
+                System.out.println("Template file already exists: " + file.getAbsolutePath());
             }
         }
+        
+        return this;
+    }
+    
+    private void createDefaultClassTemplate(File file) throws IOException {
+        String classTemplate = 
+            "<!DOCTYPE html>\n" +
+            "<html>\n" +
+            "<head>\n" +
+            "    <title>${className} - ${reportTitle}</title>\n" +
+            "    <meta charset=\"UTF-8\">\n" +
+            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+            "    <style>\n" +
+            generateComprehensiveCSS() +
+            "    </style>\n" +
+            "</head>\n" +
+            "<body class=\"${darkMode?string('dark-mode', '')}\">\n" +
+            "    <header>\n" +
+            "        <div class=\"container\">\n" +
+            "            <h1>${reportTitle}</h1>\n" +
+            "            <#if reportHeader??>\n" +
+            "                <h2>${reportHeader}</h2>\n" +
+            "            </#if>\n" +
+            "            <div class=\"nav\">\n" +
+            "                <a href=\"index.html\">Back to Index</a>\n" +
+            "            </div>\n" +
+            "        </div>\n" +
+            "    </header>\n" +
+            "    <div class=\"container\">\n" +
+            "        <div class=\"info-panel\">\n" +
+            "            <p><strong>Package:</strong> ${packageName}</p>\n" +
+            "            <p><strong>Number of Test Methods:</strong> ${testMethods?size}</p>\n" +
+            "            <p><strong>Percentage of Total:</strong> ${percentage}%</p>\n" +
+            "        </div>\n" +
+            "        \n" +
+            "        <h2>Test Methods</h2>\n" +
+            "        <#list testMethods as method>\n" +
+            "        <div class=\"method\">\n" +
+            "            <div class=\"method-name\">${method.name}</div>\n" +
+            "            <div class=\"method-description\">\n" +
+            "                <pre>${method.description}</pre>\n" +
+            "            </div>\n" +
+            "            <#if method.tags?? && method.tags?size gt 0>\n" +
+            "            <div class=\"method-tags\">\n" +
+            "                <#list method.tags as tag>\n" +
+            "                <span class=\"tag\">${tag}</span>\n" +
+            "                </#list>\n" +
+            "            </div>\n" +
+            "            </#if>\n" +
+            "        </div>\n" +
+            "        </#list>\n" +
+            "    </div>\n" +
+            "</body>\n" +
+            "</html>";
+        
+        Files.write(file.toPath(), classTemplate.getBytes());
+        System.out.println("Created default class template: " + file.getAbsolutePath());
+    }
+    
+    private void createDefaultIndexTemplate(File file) throws IOException {
+        String indexTemplate = 
+            "<!DOCTYPE html>\n" +
+            "<html>\n" +
+            "<head>\n" +
+            "    <title>${reportTitle}</title>\n" +
+            "    <meta charset=\"UTF-8\">\n" +
+            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+            "    <style>\n" +
+            generateComprehensiveCSS() +
+            "    </style>\n" +
+            "    <#if displayTagsChart>\n" +
+            "    <script src=\"https://cdn.jsdelivr.net/npm/chart.js\"></script>\n" +
+            "    <#assign tagCounts = {}>\n" +
+            "    <#list testClasses as class>\n" +
+            "        <#list class.testMethods as method>\n" +
+            "            <#list method.tags as tag>\n" +
+            "                <#if tagCounts[tag]??>\n" +
+            "                    <#assign tagCounts = tagCounts + {tag: tagCounts[tag] + 1}>\n" +
+            "                <#else>\n" +
+            "                    <#assign tagCounts = tagCounts + {tag: 1}>\n" +
+            "                </#if>\n" +
+            "            </#list>\n" +
+            "        </#list>\n" +
+            "    </#list>\n" +
+            "    </#if>\n" +
+            "</head>\n" +
+            "<body class=\"${darkMode?string('dark-mode', '')}\">\n" +
+            "    <header>\n" +
+            "        <div class=\"container\">\n" +
+            "            <h1>${reportTitle}</h1>\n" +
+            "            <#if reportHeader??>\n" +
+            "                <h2>${reportHeader}</h2>\n" +
+            "            </#if>\n" +
+            "        </div>\n" +
+            "    </header>\n" +
+            "    <div class=\"container\">\n" +
+            "        <div class=\"summary\">\n" +
+            "            <h2>Summary</h2>\n" +
+            "            <p><strong>Total Test Classes:</strong> ${testClasses?size}</p>\n" +
+            "            <#assign totalMethods = 0>\n" +
+            "            <#list testClasses as class>\n" +
+            "                <#assign totalMethods = totalMethods + class.testMethods?size>\n" +
+            "            </#list>\n" +
+            "            <p><strong>Total Test Methods:</strong> ${totalMethods}</p>\n" +
+            "        </div>\n" +
+            "        \n" +
+            "        <#if displayTagsChart && tagCounts?size gt 0>\n" +
+            "        <div class=\"chart-container\">\n" +
+            "            <h2>Tags Distribution</h2>\n" +
+            "            <canvas id=\"tagsChart\"></canvas>\n" +
+            "        </div>\n" +
+            "        <script>\n" +
+            "            const ctx = document.getElementById('tagsChart').getContext('2d');\n" +
+            "            const isDarkMode = document.body.classList.contains('dark-mode');\n" +
+            "            const chartColors = isDarkMode ? [\n" +
+            "                '#5c6bc0', '#7986cb', '#9fa8da', '#c5cae9',\n" +
+            "                '#64b5f6', '#90caf9', '#bbdefb',\n" +
+            "                '#4dd0e1', '#80deea', '#b2ebf2',\n" +
+            "                '#4db6ac', '#80cbc4', '#b2dfdb',\n" +
+            "                '#81c784', '#a5d6a7', '#c8e6c9'\n" +
+            "            ] : [\n" +
+            "                '#3f51b5', '#5c6bc0', '#7986cb', '#9fa8da',\n" +
+            "                '#2196f3', '#42a5f5', '#64b5f6',\n" +
+            "                '#00bcd4', '#26c6da', '#4dd0e1',\n" +
+            "                '#009688', '#26a69a', '#4db6ac',\n" +
+            "                '#4caf50', '#66bb6a', '#81c784'\n" +
+            "            ];\n" +
+            "            \n" +
+            "            const tagsChart = new Chart(ctx, {\n" +
+            "                type: 'doughnut',\n" +
+            "                data: {\n" +
+            "                    labels: [\n" +
+            "                        <#list tagCounts?keys as tag>\n" +
+            "                        '${tag}'<#if tag_has_next>,</#if>\n" +
+            "                        </#list>\n" +
+            "                    ],\n" +
+            "                    datasets: [{\n" +
+            "                        data: [\n" +
+            "                            <#list tagCounts?keys as tag>\n" +
+            "                            ${tagCounts[tag]}<#if tag_has_next>,</#if>\n" +
+            "                            </#list>\n" +
+            "                        ],\n" +
+            "                        backgroundColor: chartColors,\n" +
+            "                        borderWidth: 1\n" +
+            "                    }]\n" +
+            "                },\n" +
+            "                options: {\n" +
+            "                    responsive: true,\n" +
+            "                    plugins: {\n" +
+            "                        legend: {\n" +
+            "                            position: 'right',\n" +
+            "                            labels: {\n" +
+            "                                color: isDarkMode ? '#e1e1e1' : '#333333',\n" +
+            "                                font: {\n" +
+            "                                    family: 'Inter, system-ui, -apple-system, sans-serif',\n" +
+            "                                    size: 12\n" +
+            "                                }\n" +
+            "                            }\n" +
+            "                        },\n" +
+            "                        tooltip: {\n" +
+            "                            backgroundColor: isDarkMode ? '#424242' : 'rgba(255, 255, 255, 0.9)',\n" +
+            "                            titleColor: isDarkMode ? '#e1e1e1' : '#333333',\n" +
+            "                            bodyColor: isDarkMode ? '#e1e1e1' : '#333333',\n" +
+            "                            borderColor: isDarkMode ? '#616161' : '#e1e4e8',\n" +
+            "                            borderWidth: 1,\n" +
+            "                            padding: 12,\n" +
+            "                            cornerRadius: 8,\n" +
+            "                            titleFont: {\n" +
+            "                                family: 'Inter, system-ui, -apple-system, sans-serif',\n" +
+            "                                size: 14,\n" +
+            "                                weight: 'bold'\n" +
+            "                            },\n" +
+            "                            bodyFont: {\n" +
+            "                                family: 'Inter, system-ui, -apple-system, sans-serif',\n" +
+            "                                size: 13\n" +
+            "                            },\n" +
+            "                            displayColors: true,\n" +
+            "                            boxPadding: 4\n" +
+            "                        }\n" +
+            "                    }\n" +
+            "                }\n" +
+            "            });\n" +
+            "        </script>\n" +
+            "        </#if>\n" +
+            "        \n" +
+            "        <h2>Test Classes</h2>\n" +
+            "        <table>\n" +
+            "            <thead>\n" +
+            "                <tr>\n" +
+            "                    <th>Class Name</th>\n" +
+            "                    <th>Package</th>\n" +
+            "                    <th>Test Methods</th>\n" +
+            "                    <th>Percentage</th>\n" +
+            "                </tr>\n" +
+            "            </thead>\n" +
+            "            <tbody>\n" +
+            "                <#list testClasses as class>\n" +
+            "                <tr>\n" +
+            "                    <td><a href=\"${class.className}.html\">${class.className}</a></td>\n" +
+            "                    <td>${class.packageName}</td>\n" +
+            "                    <td>${class.testMethods?size}</td>\n" +
+            "                    <td>${class.percentage}%</td>\n" +
+            "                </tr>\n" +
+            "                </#list>\n" +
+            "            </tbody>\n" +
+            "        </table>\n" +
+            "    </div>\n" +
+            "</body>\n" +
+            "</html>";
+        
+        Files.write(file.toPath(), indexTemplate.getBytes());
+        System.out.println("Created default index template: " + file.getAbsolutePath());
     }
 
     /**
@@ -2109,6 +2354,17 @@ public class TestNGDocGenerator {
      */
     public TestNGDocGenerator setOutputDirectory(String outputDir) {
         this.OUTPUT_DIR = outputDir;
+        return this;
+    }
+
+    /**
+     * Add a pattern replacement for documentation text
+     * @param pattern The pattern to search for
+     * @param replacement The replacement text
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator addPatternReplacement(String pattern, String replacement) {
+        this.patternReplacements.put(pattern, replacement);
         return this;
     }
 }

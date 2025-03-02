@@ -15,17 +15,24 @@ repositories {
 }
 
 dependencies {
-    // Use the TestNG Documentation Generator from local Maven repository
-    implementation 'io.vinipx:testng-doc-generator:1.2.9'
+    // Use the TestNG Documentation Generator from local project
+    implementation files('../build/libs/testng-doc-generator-1.3.3.jar')
     
-    // Alternatively, use from JitPack
-    // implementation 'com.github.vinipx:testng-doc-generator:v1.2.9'
+    // Alternatively, use from local Maven repository or JitPack
+    // implementation 'io.vinipx:testng-doc-generator:1.3.3'
+    // implementation 'com.github.vinipx:testng-doc-generator:v1.3.3'
     
     // FreeMarker for template processing
     implementation 'org.freemarker:freemarker:2.3.32'
     
-    // TestNG for running tests
-    testImplementation 'org.testng:testng:7.7.1'
+    // Reflections for classpath scanning
+    implementation 'org.reflections:reflections:0.10.2'
+    
+    // JavaParser for parsing Java source code
+    implementation 'com.github.javaparser:javaparser-core:3.25.5'
+    
+    // TestNG for running tests (needed by the main code as well)
+    implementation 'org.testng:testng:7.7.1'
 }
 
 application {

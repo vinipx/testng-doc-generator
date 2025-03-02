@@ -25,7 +25,9 @@ public class GenerateDocumentation {
         patternReplacements.put("DB", "Database");
         
         // Set the pattern replacements
-        generator.setPatternReplacements(patternReplacements);
+        for (Map.Entry<String, String> entry : patternReplacements.entrySet()) {
+            generator.addPatternReplacement(entry.getKey(), entry.getValue());
+        }
         
         // Enable tags chart on the index page
         generator.displayTagsChart();
