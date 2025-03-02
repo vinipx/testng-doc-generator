@@ -1573,13 +1573,7 @@ public class TestNGDocGenerator {
             for (TestClassInfo testClass : testClasses) {
                 for (TestMethodInfo method : testClass.getTestMethods()) {
                     for (String tag : method.getTags()) {
-                        // Group similar tags by their prefix (e.g., "Feature: X" and "Feature: Y" are grouped as "Feature")
-                        String tagCategory = tag;
-                        if (tag.contains(":")) {
-                            tagCategory = tag.substring(0, tag.indexOf(":")).trim();
-                        }
-
-                        tagCounts.put(tagCategory, tagCounts.getOrDefault(tagCategory, 0) + 1);
+                        tagCounts.put(tag, tagCounts.getOrDefault(tag, 0) + 1);
                     }
                 }
             }
@@ -1612,7 +1606,7 @@ public class TestNGDocGenerator {
     /**
      * Generates an SVG pie chart for tag distribution
      *
-     * @param tagCounts Map of tag counts
+     * @param tagCounts      Map of tag counts
      * @param tagPercentages Map of tag percentages
      * @return SVG string representation of the pie chart
      */
@@ -2598,7 +2592,7 @@ public class TestNGDocGenerator {
         // Check if index.ftl and class.ftl exist
         File indexTemplate = new File(templatesDir, "index.ftl");
         File classTemplate = new File(templatesDir, "class.ftl");
-        
+
         return indexTemplate.exists() && classTemplate.exists();
     }
 
@@ -2625,7 +2619,7 @@ public class TestNGDocGenerator {
     /**
      * Adds a pattern replacement for technical terms
      *
-     * @param pattern The pattern to replace
+     * @param pattern     The pattern to replace
      * @param replacement The replacement text
      * @return this TestNGDocGenerator instance for method chaining
      */
