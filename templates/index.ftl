@@ -130,6 +130,17 @@
             text-align: center;
             margin-bottom: 20px;
         }
+        .summary-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .summary {
+            flex-basis: 40%;
+        }
+        .chart-container {
+            flex-basis: 55%;
+        }
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
@@ -147,6 +158,15 @@
             th, td {
                 padding: 8px 10px;
             }
+            .summary-container {
+                flex-direction: column;
+            }
+            .summary {
+                margin-bottom: 20px;
+            }
+            .chart-container {
+                margin-top: 0;
+            }
         }
     </style>
 </head>
@@ -160,10 +180,19 @@
         </div>
     </header>
     <div class="container">
-        <div class="summary">
-            <h2>Summary</h2>
-            <p><strong>Total Test Classes:</strong> ${testClasses?size}</p>
-            <p><strong>Total Test Methods:</strong> ${totalMethods}</p>
+        <div class="summary-container">
+            <div class="summary">
+                <h2>Summary</h2>
+                <p><strong>Total Test Classes:</strong> ${testClasses?size}</p>
+                <p><strong>Total Test Methods:</strong> ${totalMethods}</p>
+            </div>
+            
+            <#if displayTagsChart && tagPercentages?? && tagPercentages?size gt 0>
+            <div class="chart-container">
+                <h3 class="chart-title">Test Tags Distribution</h3>
+                <canvas id="tagsChart" width="400" height="300"></canvas>
+            </div>
+            </#if>
         </div>
         
         <h2>Test Classes</h2>
@@ -185,11 +214,6 @@
         </table>
         
         <#if displayTagsChart && tagPercentages?? && tagPercentages?size gt 0>
-        <div class="chart-container">
-            <h3 class="chart-title">Test Tags Distribution</h3>
-            <canvas id="tagsChart" width="400" height="400"></canvas>
-        </div>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 var ctx = document.getElementById('tagsChart').getContext('2d');
@@ -200,21 +224,60 @@
                         datasets: [{
                             data: [<#list tagPercentages?values as value>${value},</#list>],
                             backgroundColor: [
-                                '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
-                                '#5a5c69', '#858796', '#6f42c1', '#20c9a6', '#f8f9fc',
-                                '#3a5a8c', '#2c4a7c', '#4d7ab8', '#28a745', '#ffc107'
-                            ]
+                                <#if darkMode>
+                                '#5c6bc0', '#7986cb', '#9fa8da', '#c5cae9', '#8c9eff', '#536dfe', '#3d5afe', '#304ffe',
+                                '#6200ea', '#651fff', '#7c4dff', '#b388ff', '#d500f9', '#e040fb', '#ea80fc', '#f50057'
+                                <#else>
+                                '#3f51b5', '#5c6bc0', '#7986cb', '#9fa8da', '#3949ab', '#303f9f', '#283593', '#1a237e',
+                                '#8c9eff', '#536dfe', '#3d5afe', '#304ffe', '#6200ea', '#651fff', '#7c4dff', '#b388ff'
+                                </#if>
+                            ],
+                            borderColor: [
+                                <#if darkMode>
+                                '#121212', '#121212', '#121212', '#121212', '#121212', '#121212', '#121212', '#121212',
+                                '#121212', '#121212', '#121212', '#121212', '#121212', '#121212', '#121212', '#121212'
+                                <#else>
+                                '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff',
+                                '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff'
+                                </#if>
+                            ],
+                            borderWidth: 2
                         }]
                     },
                     options: {
                         responsive: true,
-                        maintainAspectRatio: false,
+                        maintainAspectRatio: true,
                         plugins: {
                             legend: {
                                 position: 'right',
                                 labels: {
-                                    color: '<#if darkMode>#e0e0e0<#else>#333333</#if>'
+                                    color: '<#if darkMode>#e0e0e0<#else>#424242</#if>',
+                                    font: {
+                                        family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                                        size: 12
+                                    },
+                                    padding: 15
                                 }
+                            },
+                            tooltip: {
+                                backgroundColor: '<#if darkMode>#2d2d2d<#else>#ffffff</#if>',
+                                titleColor: '<#if darkMode>#e0e0e0<#else>#424242</#if>',
+                                bodyColor: '<#if darkMode>#e0e0e0<#else>#424242</#if>',
+                                borderColor: '<#if darkMode>#444444<#else>#e0e0e0</#if>',
+                                borderWidth: 1,
+                                padding: 12,
+                                cornerRadius: 8,
+                                titleFont: {
+                                    family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                bodyFont: {
+                                    family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                                    size: 13
+                                },
+                                displayColors: true,
+                                boxPadding: 5
                             }
                         }
                     }

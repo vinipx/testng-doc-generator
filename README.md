@@ -89,6 +89,8 @@ Here are some screenshots of the generated documentation:
 
 - Java 11 or higher
 - Gradle 7.0 or higher (or use the included Gradle wrapper)
+- TestNG 7.x (included as a transitive dependency)
+- FreeMarker (included as a transitive dependency)
 
 ## 📦 Installation
 
@@ -111,7 +113,7 @@ Add the JitPack repository to your build file:
     <dependency>
         <groupId>com.github.vinipx</groupId>
         <artifactId>testng-doc-generator</artifactId>
-        <version>v1.2.6</version>
+        <version>v1.3.7</version>
     </dependency>
 </dependencies>
 ```
@@ -123,7 +125,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.vinipx:testng-doc-generator:v1.2.6'
+    implementation 'com.github.vinipx:testng-doc-generator:v1.3.7'
 }
 ```
 
@@ -136,14 +138,14 @@ The TestNG Documentation Generator is also available from Maven Central:
 <dependency>
     <groupId>io.vinipx</groupId>
     <artifactId>testng-doc-generator</artifactId>
-    <version>1.2.6</version>
+    <version>1.3.7</version>
 </dependency>
 ```
 
 **Gradle:**
 ```groovy
 dependencies {
-    implementation 'io.vinipx:testng-doc-generator:1.2.6'
+    implementation 'io.vinipx:testng-doc-generator:1.3.7'
 }
 ```
 
@@ -156,14 +158,14 @@ If you've built the project locally, you can use it from your local Maven reposi
 <dependency>
     <groupId>io.vinipx</groupId>
     <artifactId>testng-doc-generator</artifactId>
-    <version>1.2.6</version>
+    <version>1.3.7</version>
 </dependency>
 ```
 
 **Gradle:**
 ```groovy
 dependencies {
-    implementation 'io.vinipx:testng-doc-generator:1.2.6'
+    implementation 'io.vinipx:testng-doc-generator:1.3.7'
 }
 ```
 
@@ -447,7 +449,7 @@ To publish the library to your local Maven repository for testing:
 Or run the JAR directly:
 
 ```bash
-java -jar build/libs/testng-doc-generator-1.2.6-all.jar <source-directory>
+java -jar build/libs/testng-doc-generator-1.3.7-all.jar <source-directory>
 ```
 
 Replace `<source-directory>` with the directory containing your TestNG test classes.

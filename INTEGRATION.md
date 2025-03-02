@@ -27,7 +27,7 @@ Then add the dependency:
 <dependency>
     <groupId>com.github.vinipx</groupId>
     <artifactId>testng-doc-generator</artifactId>
-    <version>v1.2.1</version>
+    <version>v1.3.7</version>
 </dependency>
 ```
 
@@ -45,7 +45,7 @@ Then add the dependency:
 
 ```groovy
 dependencies {
-    implementation 'com.github.vinipx:testng-doc-generator:v1.2.1'
+    implementation 'com.github.vinipx:testng-doc-generator:v1.3.7'
 }
 ```
 
@@ -61,7 +61,7 @@ Add the dependency to your `pom.xml`:
 <dependency>
     <groupId>io.vinipx</groupId>
     <artifactId>testng-doc-generator</artifactId>
-    <version>1.2.1</version>
+    <version>1.3.7</version>
 </dependency>
 ```
 
@@ -71,9 +71,21 @@ Add the dependency to your `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'io.vinipx:testng-doc-generator:1.2.1'
+    implementation 'io.vinipx:testng-doc-generator:1.3.7'
 }
 ```
+
+## Required Dependencies
+
+As of version 1.3.7, the TestNG Documentation Generator includes the following dependencies as transitive dependencies, so you don't need to add them explicitly:
+
+- TestNG (7.7.1 or compatible)
+- FreeMarker (2.3.32 or compatible)
+
+You may still need to add other dependencies depending on your specific use case:
+
+- JavaParser (for advanced source code analysis)
+- Reflections (for classpath scanning)
 
 ## Using the Library
 

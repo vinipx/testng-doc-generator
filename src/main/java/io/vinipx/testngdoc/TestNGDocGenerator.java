@@ -1295,7 +1295,7 @@ public class TestNGDocGenerator {
             // Check class template
             String classContent = loadTemplateContent("class.ftl", cfg);
             List<String> requiredClassVars = Arrays.asList(
-                "className", "packageName", "testMethods", "percentage", "reportTitle", "darkMode"
+                "className", "packageName", "testMethods", "percentage", "reportTitle", "darkMode", "reportHeader"
             );
             
             boolean indexValid = validateTemplateVariables(indexContent, requiredIndexVars, "index.ftl");
@@ -1366,9 +1366,12 @@ public class TestNGDocGenerator {
             dataModel.put("packageName", testClass.getPackageName());
             dataModel.put("testMethods", testClass.getTestMethods());
             dataModel.put("percentage", testClass.getPercentage());
+            
+            // Add global template parameters
             dataModel.put("darkMode", darkMode);
             dataModel.put("reportTitle", reportTitle);
             dataModel.put("reportHeader", reportHeader);
+            dataModel.put("displayTagsChart", displayTagsChart);
             
             try (Writer out = new FileWriter(new File(OUTPUT_DIR, testClass.getClassName() + ".html"))) {
                 template.process(dataModel, out);
@@ -1680,6 +1683,28 @@ public class TestNGDocGenerator {
             "    font-size: 0.95rem;\n" +
             "    line-height: 1.7;\n" +
             "}\n" +
+            ".method-tags {\n" +
+            "    margin-top: 16px;\n" +
+            "    display: flex;\n" +
+            "    flex-wrap: wrap;\n" +
+            "    gap: 8px;\n" +
+            "}\n" +
+            ".tag {\n" +
+            "    display: inline-block;\n" +
+            "    background-color: var(--accent-color);\n" +
+            "    color: white;\n" +
+            "    padding: 4px 10px;\n" +
+            "    border-radius: 16px;\n" +
+            "    font-size: 0.8rem;\n" +
+            "    font-weight: 500;\n" +
+            "}\n" +
+            ".class-info {\n" +
+            "    background-color: var(--card-bg-color);\n" +
+            "    border-radius: 12px;\n" +
+            "    padding: 24px;\n" +
+            "    margin-bottom: 30px;\n" +
+            "    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);\n" +
+            "}\n" +
             ".header-note {\n" +
             "    font-size: 1.1rem;\n" +
             "    margin-top: 5px;\n" +
@@ -1691,6 +1716,22 @@ public class TestNGDocGenerator {
             "    margin-bottom: 16px;\n" +
             "    font-size: 1.2rem;\n" +
             "    text-align: center;\n" +
+            "}\n" +
+            ".nav {\n" +
+            "    margin-top: 12px;\n" +
+            "}\n" +
+            ".nav a {\n" +
+            "    color: white;\n" +
+            "    text-decoration: none;\n" +
+            "    font-weight: 500;\n" +
+            "    padding: 6px 12px;\n" +
+            "    border-radius: 4px;\n" +
+            "    background-color: rgba(255, 255, 255, 0.2);\n" +
+            "    transition: background-color 0.2s ease;\n" +
+            "}\n" +
+            ".nav a:hover {\n" +
+            "    background-color: rgba(255, 255, 255, 0.3);\n" +
+            "    border-bottom: none;\n" +
             "}\n" +
             "@media (max-width: 768px) {\n" +
             "    .container {\n" +
@@ -1717,124 +1758,7 @@ public class TestNGDocGenerator {
             "    }\n" +
             "}\n";
     }
-
-    /**
-     * Synchronizes templates from the library to the project's template directory.
-     * This ensures that the project's templates are up-to-date with the library's templates.
-     * 
-     * @param projectDir The project directory to synchronize templates to
-     * @return This TestNGDocGenerator instance for method chaining
-     */
-    public TestNGDocGenerator synchronizeTemplates(String projectDir) {
-        try {
-            System.out.println("Synchronizing templates to project directory: " + projectDir);
-            
-            // Backup existing templates
-            if (TemplateSync.backupTemplates(projectDir)) {
-                System.out.println("Existing templates backed up to " + projectDir + "/templates_backup");
-            }
-            
-            // Synchronize templates
-            if (TemplateSync.syncTemplates(projectDir)) {
-                System.out.println("Templates successfully synchronized");
-            } else {
-                System.err.println("Failed to synchronize templates");
-            }
-        } catch (Exception e) {
-            System.err.println("Error synchronizing templates: " + e.getMessage());
-        }
-        
-        return this;
-    }
     
-    /**
-     * Checks if the project's templates are synchronized with the library's templates.
-     * 
-     * @param projectDir The project directory to check
-     * @return True if templates are synchronized
-     */
-    public boolean areTemplatesSynchronized(String projectDir) {
-        return TemplateSync.areTemplatesSynchronized(projectDir);
-    }
-
-    // Inner classes for storing test information
-    public static class TestClassInfo {
-        private final String className;
-        private final String packageName;
-        private final List<TestMethodInfo> testMethods;
-        private String percentage;
-
-        public TestClassInfo(String className, String packageName, List<TestMethodInfo> testMethods) {
-            this.className = className;
-            this.packageName = packageName;
-            this.testMethods = testMethods;
-            this.percentage = "0.00";
-        }
-
-        public String getClassName() {
-            return className;
-        }
-
-        public String getPackageName() {
-            return packageName;
-        }
-
-        public List<TestMethodInfo> getTestMethods() {
-            return testMethods;
-        }
-
-        public String getPercentage() {
-            return percentage;
-        }
-
-        public void setPercentage(String percentage) {
-            this.percentage = percentage;
-        }
-    }
-
-    public static class TestMethodInfo {
-        private String name;
-        private String description;
-        private List<String> tags = new ArrayList<>();
-
-        public TestMethodInfo(String name, String description) {
-            this.name = name;
-            this.description = description;
-        }
-        
-        // Default constructor for when we build the object incrementally
-        public TestMethodInfo() {
-        }
-
-        public String getName() {
-            return name;
-        }
-        
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-        
-        public void setDescription(String description) {
-            this.description = description;
-        }
-        
-        public List<String> getTags() {
-            return tags;
-        }
-        
-        public void setTags(List<String> tags) {
-            this.tags = tags;
-        }
-        
-        public void addTag(String tag) {
-            this.tags.add(tag);
-        }
-    }
-
     /**
      * Filter test methods based on include/exclude patterns
      * 
@@ -2070,28 +1994,29 @@ public class TestNGDocGenerator {
             "<body class=\"${darkMode?string('dark-mode', '')}\">\n" +
             "    <header>\n" +
             "        <div class=\"container\">\n" +
-            "            <h1>${reportTitle}</h1>\n" +
-            "            <#if reportHeader??>\n" +
-            "                <h2>${reportHeader}</h2>\n" +
-            "            </#if>\n" +
+            "            <h1>${className}</h1>\n" +
             "            <div class=\"nav\">\n" +
             "                <a href=\"index.html\">Back to Index</a>\n" +
             "            </div>\n" +
             "        </div>\n" +
             "    </header>\n" +
             "    <div class=\"container\">\n" +
-            "        <div class=\"info-panel\">\n" +
+            "        <div class=\"class-info\">\n" +
+            "            <h2>Class Information</h2>\n" +
             "            <p><strong>Package:</strong> ${packageName}</p>\n" +
-            "            <p><strong>Number of Test Methods:</strong> ${testMethods?size}</p>\n" +
-            "            <p><strong>Percentage of Total:</strong> ${percentage}%</p>\n" +
+            "            <p><strong>Test Methods:</strong> ${testMethods?size}</p>\n" +
             "        </div>\n" +
             "        \n" +
             "        <h2>Test Methods</h2>\n" +
             "        <#list testMethods as method>\n" +
             "        <div class=\"method\">\n" +
-            "            <div class=\"method-name\">${method.name}</div>\n" +
+            "            <h3>${method.name}</h3>\n" +
             "            <div class=\"method-description\">\n" +
-            "                <pre>${method.description}</pre>\n" +
+            "                <#if method.description??>\n" +
+            "                <p>${method.description}</p>\n" +
+            "                <#else>\n" +
+            "                <p>No description available.</p>\n" +
+            "                </#if>\n" +
             "            </div>\n" +
             "            <#if method.tags?? && method.tags?size gt 0>\n" +
             "            <div class=\"method-tags\">\n" +
@@ -2370,5 +2295,124 @@ public class TestNGDocGenerator {
     public TestNGDocGenerator addPatternReplacement(String pattern, String replacement) {
         this.patternReplacements.put(pattern, replacement);
         return this;
+    }
+
+    /**
+     * Synchronizes templates from the library to the project's template directory.
+     * This ensures that the project's templates are up-to-date with the library's templates.
+     * 
+     * @param projectDir The project directory to synchronize templates to
+     * @return This TestNGDocGenerator instance for method chaining
+     */
+    public TestNGDocGenerator synchronizeTemplates(String projectDir) {
+        try {
+            System.out.println("Synchronizing templates to project directory: " + projectDir);
+            
+            // Backup existing templates
+            if (TemplateSync.backupTemplates(projectDir)) {
+                System.out.println("Existing templates backed up to " + projectDir + "/templates_backup");
+            }
+            
+            // Synchronize templates
+            if (TemplateSync.syncTemplates(projectDir)) {
+                System.out.println("Templates successfully synchronized");
+            } else {
+                System.err.println("Failed to synchronize templates");
+            }
+        } catch (Exception e) {
+            System.err.println("Error synchronizing templates: " + e.getMessage());
+        }
+        
+        return this;
+    }
+    
+    /**
+     * Checks if the project's templates are synchronized with the library's templates.
+     * 
+     * @param projectDir The project directory to check
+     * @return True if templates are synchronized
+     */
+    public boolean areTemplatesSynchronized(String projectDir) {
+        return TemplateSync.areTemplatesSynchronized(projectDir);
+    }
+
+    /**
+     * Inner classes for storing test information
+     */
+    public static class TestClassInfo {
+        private final String className;
+        private final String packageName;
+        private final List<TestMethodInfo> testMethods;
+        private String percentage;
+
+        public TestClassInfo(String className, String packageName, List<TestMethodInfo> testMethods) {
+            this.className = className;
+            this.packageName = packageName;
+            this.testMethods = testMethods;
+            this.percentage = "0.00";
+        }
+
+        public String getClassName() {
+            return className;
+        }
+
+        public String getPackageName() {
+            return packageName;
+        }
+
+        public List<TestMethodInfo> getTestMethods() {
+            return testMethods;
+        }
+
+        public String getPercentage() {
+            return percentage;
+        }
+
+        public void setPercentage(String percentage) {
+            this.percentage = percentage;
+        }
+    }
+
+    public static class TestMethodInfo {
+        private String name;
+        private String description;
+        private List<String> tags = new ArrayList<>();
+
+        public TestMethodInfo(String name, String description) {
+            this.name = name;
+            this.description = description;
+        }
+        
+        // Default constructor for when we build the object incrementally
+        public TestMethodInfo() {
+        }
+
+        public String getName() {
+            return name;
+        }
+        
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+        
+        public void setDescription(String description) {
+            this.description = description;
+        }
+        
+        public List<String> getTags() {
+            return tags;
+        }
+        
+        public void setTags(List<String> tags) {
+            this.tags = tags;
+        }
+        
+        public void addTag(String tag) {
+            this.tags.add(tag);
+        }
     }
 }

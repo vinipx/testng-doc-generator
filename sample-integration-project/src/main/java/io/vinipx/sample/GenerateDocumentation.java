@@ -31,7 +31,7 @@ public class GenerateDocumentation {
             .setOutputDirectory(outputDirectory)
             
             // UI features
-            .useDarkMode(false)  // Set to true for dark mode
+            .useDarkMode(true)  // Set to true for dark mode
             .displayTagsChart(true)  // Set to false to disable tags chart
             
             // Pattern replacements for improved readability
