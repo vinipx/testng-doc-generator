@@ -285,6 +285,9 @@ public class TestNGDocGenerator {
     private Configuration initializeFreemarker() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_32);
         
+        // Always ensure templates exist before trying to load them
+        ensureTemplateFilesExist();
+        
         // First check if templates exist in the template directory (TEMPLATE_DIR)
         Path templatePath = Paths.get(TEMPLATE_DIR);
         if (Files.exists(templatePath) && 
@@ -325,30 +328,11 @@ public class TestNGDocGenerator {
             System.out.println("Could not load templates from classpath: " + e.getMessage());
         }
         
-        // If no templates found, create them in both locations
-        try {
-            // Create templates in the template directory first
-            if (!Files.exists(templatePath)) {
-                Files.createDirectories(templatePath);
-                createDefaultTemplates(templatePath);
-                System.out.println("Created default templates in directory: " + templatePath.toAbsolutePath());
-            }
-            
-            // Also create templates in the output directory for backward compatibility
-            if (!Files.exists(outputTemplatePath)) {
-                Files.createDirectories(outputTemplatePath);
-                createDefaultTemplates(outputTemplatePath);
-                System.out.println("Created default templates in output directory: " + outputTemplatePath.toAbsolutePath());
-            }
-            
-            // Use the templates from the template directory
-            cfg.setDirectoryForTemplateLoading(new File(TEMPLATE_DIR));
-        } catch (IOException e) {
-            System.out.println("Could not create template directories: " + e.getMessage());
-            // Last resort: use classpath resources with default templates
-            cfg.setClassLoaderForTemplateLoading(getClass().getClassLoader(), "");
-            System.out.println("Using default templates from classpath as last resort");
-        }
+        // If we got here, something went wrong with template loading
+        System.err.println("WARNING: Could not find templates in any location. Using fallback configuration.");
+        
+        // Last resort: use classpath resources with default templates
+        cfg.setClassLoaderForTemplateLoading(getClass().getClassLoader(), "");
         
         cfg.setDefaultEncoding("UTF-8");
         return cfg;
@@ -2353,7 +2337,15 @@ public class TestNGDocGenerator {
      * @return This TestNGDocGenerator instance for method chaining
      */
     public TestNGDocGenerator setOutputDirectory(String outputDir) {
-        this.OUTPUT_DIR = outputDir;
+        OUTPUT_DIR = outputDir;
+        
+        // Ensure templates exist in the new output directory
+        try {
+            ensureTemplateFilesExistInDirectory(new File(OUTPUT_DIR, "templates"));
+        } catch (Exception e) {
+            System.err.println("Warning: Could not create templates in new output directory: " + e.getMessage());
+        }
+        
         return this;
     }
 
