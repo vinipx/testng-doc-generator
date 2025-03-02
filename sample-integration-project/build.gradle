@@ -11,19 +11,17 @@ targetCompatibility = '11'
 repositories {
     mavenCentral()
     mavenLocal() // For local testing
-    // maven { url 'https://jitpack.io' } // Use JitPack repository
+    //maven { url 'https://jitpack.io' } // Use JitPack repository
 }
 
 dependencies {
-    // Use the TestNG Documentation Generator from local project
-    //implementation files('../build/libs/testng-doc-generator-1.3.7.jar')
-    
     // Alternatively, use from local Maven repository or JitPack
     implementation 'io.vinipx:testng-doc-generator:1.3.7'
-    // implementation 'com.github.vinipx:testng-doc-generator:v1.3.6'
+    //implementation 'com.github.vinipx:testng-doc-generator:v1.3.7'
     
     // FreeMarker is now transitively included through the TestNG Documentation Generator
-    
+    //implementation 'org.freemarker:freemarker:2.3.32'  // Latest stable version
+
     // Reflections for classpath scanning
     implementation 'org.reflections:reflections:0.10.2'
     
@@ -50,14 +48,16 @@ test {
 
 // Add a task to run the documentation generator
 tasks.register('generateDocs', JavaExec) {
+    doFirst {
+        // Clear the output directory
+        delete 'target'
+        println "Deleted target/ folder and recreated it"
+    }
+    println "Generating TestNG documentation..."
     group = 'documentation'
     description = 'Generate TestNG documentation'
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'io.vinipx.sample.GenerateDocumentation'
-    
-    doFirst {
-        println "Generating TestNG documentation..."
-    }
 }
 
 // Add a task to run tests and then generate documentation

@@ -228,7 +228,20 @@
             }
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <#if displayTagsChart>
+    <#assign tagCounts = {}>
+    <#list testClasses as class>
+        <#list class.testMethods as method>
+            <#list method.tags as tag>
+                <#if tagCounts[tag]??>
+                    <#assign tagCounts = tagCounts + {tag: tagCounts[tag] + 1}>
+                <#else>
+                    <#assign tagCounts = tagCounts + {tag: 1}>
+                </#if>
+            </#list>
+        </#list>
+    </#list>
+    </#if>
 </head>
 <body<#if darkMode> class="dark-mode"</#if>>
     <header>
@@ -242,15 +255,15 @@
     <div class="container">
         <div class="summary-container">
             <div class="summary">
-                <h2>Summary</h2>
+                <h3>Summary</h3>
                 <p><strong>Total Test Classes:</strong> ${testClasses?size}</p>
                 <p><strong>Total Test Methods:</strong> ${totalMethods}</p>
             </div>
             
-            <#if displayTagsChart && tagStats?? && tagStats?size gt 0>
+            <#if displayTagsChart && svgChart??>
             <div class="chart-container">
                 <h3 class="chart-title">Test Tags Distribution</h3>
-                <canvas id="tagsChart"></canvas>
+                ${svgChart}
             </div>
             </#if>
         </div>
@@ -272,75 +285,6 @@
             </tr>
             </#list>
         </table>
-        
-        <#if displayTagsChart && tagStats?? && tagStats?size gt 0>
-        <script>
-            // Create a pie chart for tags distribution if the container exists
-            const tagsChartContainer = document.getElementById('tagsChart');
-            if (tagsChartContainer) {
-                const ctx = tagsChartContainer.getContext('2d');
-                
-                // Get the current mode (dark or light)
-                const isDarkMode = document.body.classList.contains('dark-mode');
-                
-                // Define colors based on the mode
-                const chartColors = isDarkMode ? 
-                    ['#5c6bc0', '#7986cb', '#9fa8da', '#c5cae9', '#3949ab', '#283593', '#1a237e', '#7986cb', '#3d5afe', '#304ffe'] : 
-                    ['#3f51b5', '#5c6bc0', '#7986cb', '#9fa8da', '#c5cae9', '#7e57c2', '#5e35b1', '#3949ab', '#303f9f', '#1a237e'];
-                
-                const chartBorderColors = isDarkMode ? 
-                    ['#3949ab', '#5c6bc0', '#7986cb', '#9fa8da', '#283593', '#1a237e', '#0d137a', '#7986cb', '#3d5afe', '#304ffe'] : 
-                    ['#303f9f', '#3f51b5', '#5c6bc0', '#7986cb', '#9fa8da', '#673ab7', '#512da8', '#303f9f', '#283593', '#1a237e'];
-                
-                new Chart(ctx, {
-                    type: 'pie',
-                    data: {
-                        labels: [<#list tagStats?keys as tag>'${tag}'<#sep>, </#sep></#list>],
-                        datasets: [{
-                            data: [<#list tagStats?values as count>${count}<#sep>, </#sep></#list>],
-                            backgroundColor: chartColors,
-                            borderColor: chartBorderColors,
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                labels: {
-                                    color: isDarkMode ? '#e0e0e0' : '#424242',
-                                    font: {
-                                        family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                                        size: 12
-                                    },
-                                    padding: 15
-                                }
-                            },
-                            tooltip: {
-                                backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff',
-                                titleColor: isDarkMode ? '#e0e0e0' : '#424242',
-                                bodyColor: isDarkMode ? '#e0e0e0' : '#424242',
-                                borderColor: isDarkMode ? '#333333' : '#e0e0e0',
-                                borderWidth: 1,
-                                padding: 12,
-                                boxPadding: 6,
-                                usePointStyle: true,
-                                callbacks: {
-                                    label: function(context) {
-                                        const label = context.dataset.label || '';
-                                        const value = context.raw || 0;
-                                        const percentage = context.parsed || 0;
-                                        return label + ': ' + value + ' (' + percentage + '%)';
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-        </script>
-        </#if>
     </div>
 </body>
 </html>

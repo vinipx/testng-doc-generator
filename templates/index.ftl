@@ -4,6 +4,21 @@
     <title>${reportTitle}</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <#if displayTagsChart>
+    
+    <#assign tagCounts = {}>
+    <#list testClasses as class>
+        <#list class.testMethods as method>
+            <#list method.tags as tag>
+                <#if tagCounts[tag]??>
+                    <#assign tagCounts = tagCounts + {tag: tagCounts[tag] + 1}>
+                <#else>
+                    <#assign tagCounts = tagCounts + {tag: 1}>
+                </#if>
+            </#list>
+        </#list>
+    </#list>
+    </#if>
     <style>
         :root {
             <#if darkMode>
@@ -182,15 +197,15 @@
     <div class="container">
         <div class="summary-container">
             <div class="summary">
-                <h2>Summary</h2>
+                <h3>Summary</h3>
                 <p><strong>Total Test Classes:</strong> ${testClasses?size}</p>
                 <p><strong>Total Test Methods:</strong> ${totalMethods}</p>
             </div>
             
-            <#if displayTagsChart && tagPercentages?? && tagPercentages?size gt 0>
+            <#if displayTagsChart && svgChart??>
             <div class="chart-container">
                 <h3 class="chart-title">Test Tags Distribution</h3>
-                <canvas id="tagsChart" width="400" height="300"></canvas>
+                ${svgChart}
             </div>
             </#if>
         </div>
@@ -212,79 +227,6 @@
             </tr>
             </#list>
         </table>
-        
-        <#if displayTagsChart && tagPercentages?? && tagPercentages?size gt 0>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                var ctx = document.getElementById('tagsChart').getContext('2d');
-                var tagsChart = new Chart(ctx, {
-                    type: 'pie',
-                    data: {
-                        labels: [<#list tagPercentages?keys as tag>'${tag}',</#list>],
-                        datasets: [{
-                            data: [<#list tagPercentages?values as value>${value},</#list>],
-                            backgroundColor: [
-                                <#if darkMode>
-                                '#5c6bc0', '#7986cb', '#9fa8da', '#c5cae9', '#8c9eff', '#536dfe', '#3d5afe', '#304ffe',
-                                '#6200ea', '#651fff', '#7c4dff', '#b388ff', '#d500f9', '#e040fb', '#ea80fc', '#f50057'
-                                <#else>
-                                '#3f51b5', '#5c6bc0', '#7986cb', '#9fa8da', '#3949ab', '#303f9f', '#283593', '#1a237e',
-                                '#8c9eff', '#536dfe', '#3d5afe', '#304ffe', '#6200ea', '#651fff', '#7c4dff', '#b388ff'
-                                </#if>
-                            ],
-                            borderColor: [
-                                <#if darkMode>
-                                '#121212', '#121212', '#121212', '#121212', '#121212', '#121212', '#121212', '#121212',
-                                '#121212', '#121212', '#121212', '#121212', '#121212', '#121212', '#121212', '#121212'
-                                <#else>
-                                '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff',
-                                '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff'
-                                </#if>
-                            ],
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                labels: {
-                                    color: '<#if darkMode>#e0e0e0<#else>#424242</#if>',
-                                    font: {
-                                        family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-                                        size: 12
-                                    },
-                                    padding: 15
-                                }
-                            },
-                            tooltip: {
-                                backgroundColor: '<#if darkMode>#2d2d2d<#else>#ffffff</#if>',
-                                titleColor: '<#if darkMode>#e0e0e0<#else>#424242</#if>',
-                                bodyColor: '<#if darkMode>#e0e0e0<#else>#424242</#if>',
-                                borderColor: '<#if darkMode>#444444<#else>#e0e0e0</#if>',
-                                borderWidth: 1,
-                                padding: 12,
-                                cornerRadius: 8,
-                                titleFont: {
-                                    family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-                                    size: 14,
-                                    weight: 'bold'
-                                },
-                                bodyFont: {
-                                    family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-                                    size: 13
-                                },
-                                displayColors: true,
-                                boxPadding: 5
-                            }
-                        }
-                    }
-                });
-            });
-        </script>
-        </#if>
     </div>
 </body>
 </html>

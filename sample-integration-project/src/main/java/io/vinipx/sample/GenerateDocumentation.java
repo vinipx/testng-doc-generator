@@ -17,7 +17,7 @@ public class GenerateDocumentation {
     public static void main(String[] args) {
         // Path to the test classes
         String testClassesPath = "src/test/java";
-        String outputDirectory = "testng-docs";
+        String outputDirectory = "target/docs";
         
         // Get current date for the report header
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM dd, yyyy");
@@ -31,7 +31,7 @@ public class GenerateDocumentation {
             .setOutputDirectory(outputDirectory)
             
             // UI features
-            .useDarkMode(true)  // Set to true for dark mode
+            .useDarkMode(false)  // Set to true for dark mode
             .displayTagsChart(true)  // Set to false to disable tags chart
             
             // Pattern replacements for improved readability
